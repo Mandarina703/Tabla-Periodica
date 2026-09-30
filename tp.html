@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabla Periódica Interactiva (118 Elementos)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        alkali: '#ef4444',
+                        alkaline: '#f97316',
+                        transition: '#eab308',
+                        post_transition: '#10b981',
+                        metalloid: '#14b8a6',
+                        nonmetal: '#3b82f6',
+                        halogen: '#6366f1',
+                        noble: '#8b5cf6',
+                        lanthanide: '#ec4899',
+                        actinide: '#f43f5e',
+                        unknown: '#64748b'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .code-font {
+            font-family: 'Fira Code', monospace;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+        .periodic-grid {
+            display: grid;
+            grid-template-columns: repeat(18, minmax(0, 1fr));
+            gap: 3px;
+        }
+        .lanthanide-actinide-grid {
+            display: grid;
+            grid-template-columns: repeat(15, minmax(0, 1fr));
+            gap: 3px;
+        }
+        @media (max-width: 1100px) {
+            .periodic-wrapper {
+                overflow-x: auto;
+                padding-bottom: 0.75rem;
+            }
+            .periodic-grid, .lanthanide-actinide-grid {
+                min-width: 900px;
+            }
+        }
+        .element-card {
+            transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.2s ease;
+        }
+        .element-card:hover {
+            transform: scale(1.15);
+            z-index: 30;
+            box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.7);
+        }
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .transform-style-3d {
+            transform-style: preserve-3d;
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
+
+    <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 font-black text-xl text-white">
+                    Pt
+                </div>
+                <div>
+                    <h1 class="text-base sm:text-lg font-bold bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400 bg-clip-text text-transparent">
+                        Tabla Periódica Completa
+                    </h1>
+                    <p class="text-[11px] text-slate-400 font-medium">118 Elementos Químicos • Plataforma Interactiva</p>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <nav class="flex space-x-1 bg-slate-950/80 p-1 rounded-xl border border-slate-800">
+                <button id="nav-study" onclick="switchTab('study')" class="nav-btn flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all text-white bg-indigo-600 shadow">
+                    <i class="fa-solid fa-flask text-xs"></i>
+                    <span>Estudio</span>
+                </button>
+                <button id="nav-practice" onclick="switchTab('practice')" class="nav-btn flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/50">
+                    <i class="fa-solid fa-layer-group text-xs"></i>
+                    <span>Práctica</span>
+                </button>
+                <button id="nav-exam" onclick="switchTab('exam')" class="nav-btn flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/50">
+                    <i class="fa-solid fa-graduation-cap text-xs"></i>
+                    <span>Examen</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-2 sm:px-6 lg:px-8 py-5">
+
+        <section id="section-study" class="space-y-4">
+            <!-- Controls Bar -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 shadow-lg flex flex-col md:flex-row gap-3 justify-between items-center">
+                <div class="relative w-full md:w-80">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <input type="text" id="study-search" oninput="filterElements()" placeholder="Buscar por nombre, símbolo o N°..." 
+                        class="w-full pl-9 pr-3 py-2 bg-slate-950 border border-slate-700/80 rounded-lg focus:outline-none focus:border-indigo-500 text-xs text-slate-100 placeholder-slate-500">
+                </div>
+
+                <div class="flex flex-wrap gap-1 justify-center md:justify-end" id="legend-container">
+                    <!-- Dynamic legend rendered by JS -->
+                </div>
+            </div>
+
+            <!-- Periodic Table Layout -->
+            <div class="bg-slate-900/50 border border-slate-800/80 rounded-xl p-3 sm:p-5 shadow-xl backdrop-blur-sm">
+                <div class="periodic-wrapper">
+                    <!-- Main Grid -->
+                    <div id="periodic-table-grid" class="periodic-grid"></div>
+
+                    <!-- Separator & Sub-grids for Lanthanides and Actinides -->
+                    <div class="mt-4 pt-3 border-t border-slate-800/80 space-y-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] uppercase font-bold text-pink-400 w-20 flex-shrink-0">Lantánidos</span>
+                            <div id="lanthanides-grid" class="lanthanide-actinide-grid flex-grow"></div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] uppercase font-bold text-rose-400 w-20 flex-shrink-0">Actínidos</span>
+                            <div id="actinides-grid" class="lanthanide-actinide-grid flex-grow"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="section-practice" class="hidden space-y-6 max-w-2xl mx-auto">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl text-center">
+                <h2 class="text-xl font-bold text-white mb-1">Tarjetas de Memorización (Flashcards)</h2>
+                <p class="text-slate-400 text-xs mb-5">Estudia los 118 elementos uno por uno. Haz clic sobre la tarjeta para voltearla.</p>
+
+                <div class="flex flex-wrap gap-2 justify-center mb-6">
+                    <select id="practice-filter" onchange="filterPracticeCategory()" class="bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded-lg px-3 py-2 outline-none focus:border-indigo-500">
+                        <option value="all">Todas las categorías (118)</option>
+                        <option value="nonmetal">No Metales</option>
+                        <option value="noble">Gases Nobles</option>
+                        <option value="alkali">Metales Alcalinos</option>
+                        <option value="alkaline">Alcalinotérreos</option>
+                        <option value="metalloid">Metaloides</option>
+                        <option value="halogen">Halógenos</option>
+                        <option value="transition">Metales de Transición</option>
+                        <option value="post_transition">Otros Metales</option>
+                        <option value="lanthanide">Lantánidos</option>
+                        <option value="actinide">Actínidos</option>
+                    </select>
+
+                    <button onclick="randomizePracticeCard()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 border border-slate-700">
+                        <i class="fa-solid fa-shuffle text-indigo-400"></i> Aleatorio
+                    </button>
+                </div>
+
+                <div class="perspective-1000 w-full max-w-xs sm:max-w-sm mx-auto h-72 cursor-pointer" onclick="flipPracticeCard()">
+                    <div id="flashcard" class="relative w-full h-full rounded-2xl transition-all duration-500 transform-style-3d shadow-2xl border border-slate-700/80">
+                        <div id="card-front" class="absolute inset-0 w-full h-full rounded-2xl p-5 flex flex-col justify-between items-center backface-hidden bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700">
+                            <div class="w-full flex justify-between text-slate-400 text-xs font-semibold">
+                                <span id="card-number-front">#1</span>
+                                <span id="card-category-front" class="px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-[10px]">No Metal</span>
+                            </div>
+                            <div class="text-center">
+                                <div id="card-symbol-front" class="text-6xl font-extrabold text-indigo-400 mb-1">H</div>
+                                <p class="text-[10px] text-slate-400 uppercase tracking-widest font-semibold">Haz clic para voltear</p>
+                            </div>
+                            <div class="text-slate-400 text-xs font-mono" id="card-mass-front">1.008 u</div>
+                        </div>
+
+                        <div id="card-back" class="absolute inset-0 w-full h-full rounded-2xl p-5 flex flex-col justify-between items-center backface-hidden rotate-y-180 bg-slate-900 border-2 border-indigo-500/50">
+                            <div class="text-indigo-400 text-[10px] font-bold uppercase tracking-wider">Información del Elemento</div>
+                            <div class="text-center space-y-1.5">
+                                <h3 id="card-name-back" class="text-2xl font-extrabold text-white">Hidrógeno</h3>
+                                <div id="card-symbol-back" class="text-sm font-bold text-indigo-400">H (Número Atómico: 1)</div>
+                                <p id="card-group-back" class="text-xs text-slate-300">Periodo 1, Grupo 1</p>
+                                <p id="card-mass-back" class="code-font text-xs text-amber-400 bg-slate-950 px-3 py-1 rounded-lg border border-slate-800 inline-block">Masa: 1.008 u</p>
+                            </div>
+                            <div class="text-slate-500 text-[10px]">Haz clic para volver al frente</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-center items-center gap-3">
+                    <button onclick="prevPracticeCard()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg font-semibold text-xs transition-all flex items-center gap-1.5 border border-slate-700">
+                        <i class="fa-solid fa-arrow-left"></i> Anteriores
+                    </button>
+                    <span id="practice-counter" class="text-xs text-slate-400 font-mono px-2">1 / 118</span>
+                    <button onclick="nextPracticeCard()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg font-semibold text-xs transition-all flex items-center gap-1.5 border border-slate-700">
+                        Siguiente <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="section-exam" class="hidden space-y-6 max-w-2xl mx-auto">
+            <!-- Setup View -->
+            <div id="exam-setup" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+                <div class="text-center mb-6">
+                    <div class="w-12 h-12 bg-indigo-500/10 text-indigo-400 rounded-xl flex items-center justify-center mx-auto mb-3 border border-indigo-500/20 text-xl">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-white mb-1">Configuración del Examen</h2>
+                    <p class="text-slate-400 text-xs">Pon a prueba tu conocimiento de los 118 elementos</p>
+                </div>
+
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Modalidad de Preguntas</label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            <label class="cursor-pointer p-3 rounded-xl border border-slate-800 bg-slate-950 hover:border-indigo-500/50 flex items-start gap-2.5 transition-all">
+                                <input type="radio" name="exam-type" value="elem_to_sym_num" checked class="mt-1 text-indigo-600 focus:ring-indigo-500">
+                                <div>
+                                    <div class="text-xs font-semibold text-white">a) Nombre $\rightarrow$ Símbolo y N° Atómico</div>
+                                    <div class="text-[10px] text-slate-400">Dado el Nombre, responde Símbolo y N° Atómico</div>
+                                </div>
+                            </label>
+
+                            <label class="cursor-pointer p-3 rounded-xl border border-slate-800 bg-slate-950 hover:border-indigo-500/50 flex items-start gap-2.5 transition-all">
+                                <input type="radio" name="exam-type" value="num_to_name_sym" class="mt-1 text-indigo-600 focus:ring-indigo-500">
+                                <div>
+                                    <div class="text-xs font-semibold text-white">b) N° Atómico $\rightarrow$ Nombre y Símbolo</div>
+                                    <div class="text-[10px] text-slate-400">Dado solo el N° Atómico, responde Nombre y Símbolo</div>
+                                </div>
+                            </label>
+
+                            <label class="cursor-pointer p-3 rounded-xl border border-slate-800 bg-slate-950 hover:border-indigo-500/50 flex items-start gap-2.5 transition-all">
+                                <input type="radio" name="exam-type" value="sym_to_name_num" class="mt-1 text-indigo-600 focus:ring-indigo-500">
+                                <div>
+                                    <div class="text-xs font-semibold text-white">c) Símbolo $\rightarrow$ Nombre y N° Atómico</div>
+                                    <div class="text-[10px] text-slate-400">Dado el Símbolo, responde Nombre y N° Atómico</div>
+                                </div>
+                            </label>
+
+                            <label class="cursor-pointer p-3 rounded-xl border border-slate-800 bg-slate-950 hover:border-indigo-500/50 flex items-start gap-2.5 transition-all">
+                                <input type="radio" name="exam-type" value="mixed" class="mt-1 text-indigo-600 focus:ring-indigo-500">
+                                <div>
+                                    <div class="text-xs font-semibold text-indigo-400">d) Preguntas Mixtas</div>
+                                    <div class="text-[10px] text-slate-400">Mezcla aleatoria de todas las modalidades</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Cantidad de Preguntas</label>
+                            <select id="exam-count" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-white focus:border-indigo-500 outline-none">
+                                <option value="10">10 Preguntas</option>
+                                <option value="20" selected>20 Preguntas</option>
+                                <option value="50">50 Preguntas</option>
+                                <option value="118">Todos los 118 Elementos</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Temporizador por Pregunta</label>
+                            <select id="exam-timer" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-white focus:border-indigo-500 outline-none">
+                                <option value="0">Sin Límite de tiempo</option>
+                                <option value="15">15 Segundos</option>
+                                <option value="30" selected>30 Segundos</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button onclick="startExam()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 text-sm">
+                        <i class="fa-solid fa-play"></i> Iniciar Examen
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quiz Active Screen -->
+            <div id="exam-active" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                    <div class="flex items-center gap-2">
+                        <span id="quiz-progress" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                            Pregunta 1 de 20
+                        </span>
+                        <span id="quiz-timer-display" class="text-xs font-bold text-amber-400 flex items-center gap-1">
+                            <i class="fa-solid fa-stopwatch"></i> <span id="quiz-timer-count">30</span>s
+                        </span>
+                    </div>
+
+                    <div class="flex items-center gap-3 text-xs font-semibold">
+                        <span class="text-emerald-400"><i class="fa-solid fa-check"></i> <span id="quiz-score-correct">0</span></span>
+                        <span class="text-rose-400"><i class="fa-solid fa-xmark"></i> <span id="quiz-score-incorrect">0</span></span>
+                    </div>
+                </div>
+
+                <div class="bg-slate-950 border border-slate-800 p-5 rounded-xl text-center space-y-1">
+                    <p id="quiz-question-title" class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest"></p>
+                    <h3 id="quiz-prompt-main" class="text-3xl font-extrabold text-white"></h3>
+                    <p id="quiz-prompt-sub" class="text-xs text-slate-400"></p>
+                </div>
+
+                <form id="quiz-form" onsubmit="submitExamAnswer(event)" class="space-y-4">
+                    <div id="quiz-inputs-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+
+                    <div class="flex gap-2">
+                        <button type="submit" id="quiz-submit-btn" class="flex-grow py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg shadow text-xs transition-all">
+                            Enviar Respuesta
+                        </button>
+                        <button type="button" id="quiz-next-btn" onclick="nextQuizQuestion()" class="hidden flex-grow py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg shadow text-xs transition-all flex items-center justify-center gap-1.5">
+                            Siguiente Pregunta <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </form>
+
+                <div id="quiz-feedback" class="hidden p-3.5 rounded-xl border text-xs flex items-start gap-2.5">
+                    <i id="quiz-feedback-icon" class="fa-solid text-base mt-0.5"></i>
+                    <div>
+                        <div id="quiz-feedback-title" class="font-bold mb-0.5"></div>
+                        <div id="quiz-feedback-detail" class="text-[11px]"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz Results -->
+            <div id="exam-results" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl text-center space-y-5">
+                <div class="w-16 h-16 bg-indigo-500/10 text-indigo-400 rounded-full flex items-center justify-center mx-auto border border-indigo-500/20 text-2xl">
+                    <i class="fa-solid fa-trophy"></i>
+                </div>
+
+                <div>
+                    <h2 class="text-xl font-bold text-white mb-0.5">¡Examen Completado!</h2>
+                    <p class="text-slate-400 text-xs">Resumen general de tu rendimiento</p>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 bg-slate-950 p-3 rounded-xl border border-slate-800">
+                    <div>
+                        <div class="text-xl font-bold text-white" id="results-score-pct">0%</div>
+                        <div class="text-[10px] text-slate-400 uppercase font-semibold">Precisión</div>
+                    </div>
+                    <div>
+                        <div class="text-xl font-bold text-emerald-400" id="results-score-correct">0</div>
+                        <div class="text-[10px] text-slate-400 uppercase font-semibold">Aciertos</div>
+                    </div>
+                    <div>
+                        <div class="text-xl font-bold text-rose-400" id="results-score-incorrect">0</div>
+                        <div class="text-[10px] text-slate-400 uppercase font-semibold">Fallos</div>
+                    </div>
+                </div>
+
+                <div class="text-left space-y-1.5">
+                    <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Desglose de Respuestas</h4>
+                    <div id="results-breakdown" class="max-h-56 overflow-y-auto space-y-1.5 pr-1"></div>
+                </div>
+
+                <button onclick="resetExam()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow transition-all text-xs flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-rotate-right"></i> Realizar Otro Examen
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <div id="element-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-200 p-4">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-2xl p-5 shadow-2xl relative transform scale-95 transition-all duration-200 space-y-4" id="modal-card">
+            <button onclick="closeModal()" class="absolute top-3.5 right-3.5 w-7 h-7 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-all">
+                <i class="fa-solid fa-xmark text-xs"></i>
+            </button>
+
+            <div class="flex items-center gap-3.5">
+                <div id="modal-badge" class="w-16 h-16 rounded-xl bg-indigo-600 text-white flex flex-col items-center justify-center shadow-lg font-bold flex-shrink-0">
+                    <span id="modal-number" class="text-[10px] opacity-80">1</span>
+                    <span id="modal-symbol" class="text-2xl">H</span>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h3 id="modal-name" class="text-xl font-extrabold text-white">Hidrógeno</h3>
+                    </div>
+                    <span id="modal-category" class="inline-block mt-0.5 text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-indigo-300 font-semibold border border-slate-700">No Metal</span>
+                    <p id="modal-mass" class="text-xs text-amber-400 font-mono mt-0.5">Masa Atómica: 1.008 u</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2.5 bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs">
+                <div>
+                    <span class="text-slate-500 block text-[10px]">Ubicación</span>
+                    <span id="modal-group-period" class="font-semibold text-slate-200">Grupo 1, Periodo 1</span>
+                </div>
+                <div>
+                    <span class="text-slate-500 block text-[10px]">Número Atómico</span>
+                    <span id="modal-num-display" class="font-semibold text-slate-200">1</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // FULL 118 CHEMICAL ELEMENTS DATASET (IUPAC Standard)
+        const elementsData = [
+            { num: 1, sym: "H", name: "Hidrógeno", mass: "1.008", category: "nonmetal", group: 1, period: 1 },
+            { num: 2, sym: "He", name: "Helio", mass: "4.0026", category: "noble", group: 18, period: 1 },
+            { num: 3, sym: "Li", name: "Litio", mass: "6.94", category: "alkali", group: 1, period: 2 },
+            { num: 4, sym: "Be", name: "Berilio", mass: "9.0122", category: "alkaline", group: 2, period: 2 },
+            { num: 5, sym: "B", name: "Boro", mass: "10.81", category: "metalloid", group: 13, period: 2 },
+            { num: 6, sym: "C", name: "Carbono", mass: "12.011", category: "nonmetal", group: 14, period: 2 },
+            { num: 7, sym: "N", name: "Nitrógeno", mass: "14.007", category: "nonmetal", group: 15, period: 2 },
+            { num: 8, sym: "O", name: "Oxígeno", mass: "15.999", category: "nonmetal", group: 16, period: 2 },
+            { num: 9, sym: "F", name: "Flúor", mass: "18.998", category: "halogen", group: 17, period: 2 },
+            { num: 10, sym: "Ne", name: "Neón", mass: "20.180", category: "noble", group: 18, period: 2 },
+            { num: 11, sym: "Na", name: "Sodio", mass: "22.990", category: "alkali", group: 1, period: 3 },
+            { num: 12, sym: "Mg", name: "Magnesio", mass: "24.305", category: "alkaline", group: 2, period: 3 },
+            { num: 13, sym: "Al", name: "Aluminio", mass: "26.982", category: "post_transition", group: 13, period: 3 },
+            { num: 14, sym: "Si", name: "Silicio", mass: "28.085", category: "metalloid", group: 14, period: 3 },
+            { num: 15, sym: "P", name: "Fósforo", mass: "30.974", category: "nonmetal", group: 15, period: 3 },
+            { num: 16, sym: "S", name: "Azufre", mass: "32.06", category: "nonmetal", group: 16, period: 3 },
+            { num: 17, sym: "Cl", name: "Cloro", mass: "35.45", category: "halogen", group: 17, period: 3 },
+            { num: 18, sym: "Ar", name: "Argón", mass: "39.948", category: "noble", group: 18, period: 3 },
+            { num: 19, sym: "K", name: "Potasio", mass: "39.098", category: "alkali", group: 1, period: 4 },
+            { num: 20, sym: "Ca", name: "Calcio", mass: "40.078", category: "alkaline", group: 2, period: 4 },
+            { num: 21, sym: "Sc", name: "Escandio", mass: "44.956", category: "transition", group: 3, period: 4 },
+            { num: 22, sym: "Ti", name: "Titanio", mass: "47.867", category: "transition", group: 4, period: 4 },
+            { num: 23, sym: "V", name: "Vanadio", mass: "50.942", category: "transition", group: 5, period: 4 },
+            { num: 24, sym: "Cr", name: "Cromo", mass: "51.996", category: "transition", group: 6, period: 4 },
+            { num: 25, sym: "Mn", name: "Manganeso", mass: "54.938", category: "transition", group: 7, period: 4 },
+            { num: 26, sym: "Fe", name: "Hierro", mass: "55.845", category: "transition", group: 8, period: 4 },
+            { num: 27, sym: "Co", name: "Cobalto", mass: "58.933", category: "transition", group: 9, period: 4 },
+            { num: 28, sym: "Ni", name: "Níquel", mass: "58.693", category: "transition", group: 10, period: 4 },
+            { num: 29, sym: "Cu", name: "Cobre", mass: "63.546", category: "transition", group: 11, period: 4 },
+            { num: 30, sym: "Zn", name: "Zinc", mass: "65.38", category: "transition", group: 12, period: 4 },
+            { num: 31, sym: "Ga", name: "Galio", mass: "69.723", category: "post_transition", group: 13, period: 4 },
+            { num: 32, sym: "Ge", name: "Germanio", mass: "72.630", category: "metalloid", group: 14, period: 4 },
+            { num: 33, sym: "As", name: "Arsénico", mass: "74.922", category: "metalloid", group: 15, period: 4 },
+            { num: 34, sym: "Se", name: "Selenio", mass: "78.971", category: "nonmetal", group: 16, period: 4 },
+            { num: 35, sym: "Br", name: "Bromo", mass: "79.904", category: "halogen", group: 17, period: 4 },
+            { num: 36, sym: "Kr", name: "Kriptón", mass: "83.798", category: "noble", group: 18, period: 4 },
+            { num: 37, sym: "Rb", name: "Rubidio", mass: "85.468", category: "alkali", group: 1, period: 5 },
+            { num: 38, sym: "Sr", name: "Estroncio", mass: "87.62", category: "alkaline", group: 2, period: 5 },
+            { num: 39, sym: "Y", name: "Itrio", mass: "88.906", category: "transition", group: 3, period: 5 },
+            { num: 40, sym: "Zr", name: "Zirconio", mass: "91.224", category: "transition", group: 4, period: 5 },
+            { num: 41, sym: "Nb", name: "Niobio", mass: "92.906", category: "transition", group: 5, period: 5 },
+            { num: 42, sym: "Mo", name: "Molibdeno", mass: "95.95", category: "transition", group: 6, period: 5 },
+            { num: 43, sym: "Tc", name: "Tecnecio", mass: "(98)", category: "transition", group: 7, period: 5 },
+            { num: 44, sym: "Ru", name: "Rutenio", mass: "101.07", category: "transition", group: 8, period: 5 },
+            { num: 45, sym: "Rh", name: "Rodio", mass: "102.91", category: "transition", group: 9, period: 5 },
+            { num: 46, sym: "Pd", name: "Paladio", mass: "106.42", category: "transition", group: 10, period: 5 },
+            { num: 47, sym: "Ag", name: "Plata", mass: "107.87", category: "transition", group: 11, period: 5 },
+            { num: 48, sym: "Cd", name: "Cadmio", mass: "112.41", category: "transition", group: 12, period: 5 },
+            { num: 49, sym: "In", name: "Indio", mass: "114.82", category: "post_transition", group: 13, period: 5 },
+            { num: 50, sym: "Sn", name: "Estaño", mass: "118.71", category: "post_transition", group: 14, period: 5 },
+            { num: 51, sym: "Sb", name: "Antimonio", mass: "121.76", category: "metalloid", group: 15, period: 5 },
+            { num: 52, sym: "Te", name: "Telurio", mass: "127.60", category: "metalloid", group: 16, period: 5 },
+            { num: 53, sym: "I", name: "Yodo", mass: "126.90", category: "halogen", group: 17, period: 5 },
+            { num: 54, sym: "Xe", name: "Xenón", mass: "131.29", category: "noble", group: 18, period: 5 },
+            { num: 55, sym: "Cs", name: "Cesio", mass: "132.91", category: "alkali", group: 1, period: 6 },
+            { num: 56, sym: "Ba", name: "Bario", mass: "137.33", category: "alkaline", group: 2, period: 6 },
+            { num: 57, sym: "La", name: "Lántano", mass: "138.91", category: "lanthanide", group: 3, period: 6 },
+            { num: 58, sym: "Ce", name: "Cerio", mass: "140.12", category: "lanthanide", group: 3, period: 6 },
+            { num: 59, sym: "Pr", name: "Praseodimio", mass: "140.91", category: "lanthanide", group: 3, period: 6 },
+            { num: 60, sym: "Nd", name: "Neodimio", mass: "144.24", category: "lanthanide", group: 3, period: 6 },
+            { num: 61, sym: "Pm", name: "Prometio", mass: "(145)", category: "lanthanide", group: 3, period: 6 },
+            { num: 62, sym: "Sm", name: "Samario", mass: "150.36", category: "lanthanide", group: 3, period: 6 },
+            { num: 63, sym: "Eu", name: "Europio", mass: "151.96", category: "lanthanide", group: 3, period: 6 },
+            { num: 64, sym: "Gd", name: "Gadolinio", mass: "157.25", category: "lanthanide", group: 3, period: 6 },
+            { num: 65, sym: "Tb", name: "Terbio", mass: "158.93", category: "lanthanide", group: 3, period: 6 },
+            { num: 66, sym: "Dy", name: "Disprosio", mass: "162.50", category: "lanthanide", group: 3, period: 6 },
+            { num: 67, sym: "Ho", name: "Holmio", mass: "164.93", category: "lanthanide", group: 3, period: 6 },
+            { num: 68, sym: "Er", name: "Erbio", mass: "167.26", category: "lanthanide", group: 3, period: 6 },
+            { num: 69, sym: "Tm", name: "Tulio", mass: "168.93", category: "lanthanide", group: 3, period: 6 },
+            { num: 70, sym: "Yb", name: "Iterbio", mass: "173.05", category: "lanthanide", group: 3, period: 6 },
+            { num: 71, sym: "Lu", name: "Lutecio", mass: "174.97", category: "lanthanide", group: 3, period: 6 },
+            { num: 72, sym: "Hf", name: "Hafnio", mass: "178.49", category: "transition", group: 4, period: 6 },
+            { num: 73, sym: "Ta", name: "Tántalo", mass: "180.95", category: "transition", group: 5, period: 6 },
+            { num: 74, sym: "W", name: "Wolframio", mass: "183.84", category: "transition", group: 6, period: 6 },
+            { num: 75, sym: "Re", name: "Renio", mass: "186.21", category: "transition", group: 7, period: 6 },
+            { num: 76, sym: "Os", name: "Osmio", mass: "190.23", category: "transition", group: 8, period: 6 },
+            { num: 77, sym: "Ir", name: "Iridio", mass: "192.22", category: "transition", group: 9, period: 6 },
+            { num: 78, sym: "Pt", name: "Platino", mass: "195.08", category: "transition", group: 10, period: 6 },
+            { num: 79, sym: "Au", name: "Oro", mass: "196.97", category: "transition", group: 11, period: 6 },
+            { num: 80, sym: "Hg", name: "Mercurio", mass: "200.59", category: "transition", group: 12, period: 6 },
+            { num: 81, sym: "Tl", name: "Talio", mass: "204.38", category: "post_transition", group: 13, period: 6 },
+            { num: 82, sym: "Pb", name: "Plomo", mass: "207.2", category: "post_transition", group: 14, period: 6 },
+            { num: 83, sym: "Bi", name: "Bismuto", mass: "208.98", category: "post_transition", group: 15, period: 6 },
+            { num: 84, sym: "Po", name: "Polonio", mass: "(209)", category: "post_transition", group: 16, period: 6 },
+            { num: 85, sym: "At", name: "Astato", mass: "(210)", category: "halogen", group: 17, period: 6 },
+            { num: 86, sym: "Rn", name: "Radón", mass: "(222)", category: "noble", group: 18, period: 6 },
+            { num: 87, sym: "Fr", name: "Francio", mass: "(223)", category: "alkali", group: 1, period: 7 },
+            { num: 88, sym: "Ra", name: "Radio", mass: "(226)", category: "alkaline", group: 2, period: 7 },
+            { num: 89, sym: "Ac", name: "Actinio", mass: "(227)", category: "actinide", group: 3, period: 7 },
+            { num: 90, sym: "Th", name: "Torio", mass: "232.04", category: "actinide", group: 3, period: 7 },
+            { num: 91, sym: "Pa", name: "Protactinio", mass: "231.04", category: "actinide", group: 3, period: 7 },
+            { num: 92, sym: "U", name: "Uranio", mass: "238.03", category: "actinide", group: 3, period: 7 },
+            { num: 93, sym: "Np", name: "Neptunio", mass: "(237)", category: "actinide", group: 3, period: 7 },
+            { num: 94, sym: "Pu", name: "Plutonio", mass: "(244)", category: "actinide", group: 3, period: 7 },
+            { num: 95, sym: "Am", name: "Americio", mass: "(243)", category: "actinide", group: 3, period: 7 },
+            { num: 96, sym: "Cm", name: "Curio", mass: "(247)", category: "actinide", group: 3, period: 7 },
+            { num: 97, sym: "Bk", name: "Berkelio", mass: "(247)", category: "actinide", group: 3, period: 7 },
+            { num: 98, sym: "Cf", name: "Californio", mass: "(251)", category: "actinide", group: 3, period: 7 },
+            { num: 99, sym: "Es", name: "Einstenio", mass: "(252)", category: "actinide", group: 3, period: 7 },
+            { num: 100, sym: "Fm", name: "Fermio", mass: "(257)", category: "actinide", group: 3, period: 7 },
+            { num: 101, sym: "Md", name: "Mendelevio", mass: "(258)", category: "actinide", group: 3, period: 7 },
+            { num: 102, sym: "No", name: "Nobelio", mass: "(259)", category: "actinide", group: 3, period: 7 },
+            { num: 103, sym: "Lr", name: "Lawrencio", mass: "(266)", category: "actinide", group: 3, period: 7 },
+            { num: 104, sym: "Rf", name: "Rutherfordio", mass: "(267)", category: "transition", group: 4, period: 7 },
+            { num: 105, sym: "Db", name: "Dubnio", mass: "(268)", category: "transition", group: 5, period: 7 },
+            { num: 106, sym: "Sg", name: "Seaborgio", mass: "(269)", category: "transition", group: 6, period: 7 },
+            { num: 107, sym: "Bh", name: "Bohrio", mass: "(270)", category: "transition", group: 7, period: 7 },
+            { num: 108, sym: "Hs", name: "Hassio", mass: "(277)", category: "transition", group: 8, period: 7 },
+            { num: 109, sym: "Mt", name: "Meitnerio", mass: "(278)", category: "transition", group: 9, period: 7 },
+            { num: 110, sym: "Ds", name: "Darmstadtio", mass: "(281)", category: "transition", group: 10, period: 7 },
+            { num: 111, sym: "Rg", name: "Roentgenio", mass: "(282)", category: "transition", group: 11, period: 7 },
+            { num: 112, sym: "Cn", name: "Copernicio", mass: "(285)", category: "transition", group: 12, period: 7 },
+            { num: 113, sym: "Nh", name: "Nihonio", mass: "(286)", category: "post_transition", group: 13, period: 7 },
+            { num: 114, sym: "Fl", name: "Flerovio", mass: "(289)", category: "post_transition", group: 14, period: 7 },
+            { num: 115, sym: "Mc", name: "Moscovio", mass: "(290)", category: "post_transition", group: 15, period: 7 },
+            { num: 116, sym: "Lv", name: "Livermorio", mass: "(293)", category: "post_transition", group: 16, period: 7 },
+            { num: 117, sym: "Ts", name: "Teneso", mass: "(294)", category: "halogen", group: 17, period: 7 },
+            { num: 118, sym: "Og", name: "Oganesón", mass: "(294)", category: "noble", group: 18, period: 7 }
+        ];
+
+        // Categories Configuration
+        const categoryMap = {
+            nonmetal: { name: "No Metales", bg: "bg-blue-500/20 border-blue-500/40 text-blue-300", hover: "hover:bg-blue-500/40" },
+            noble: { name: "Gases Nobles", bg: "bg-purple-500/20 border-purple-500/40 text-purple-300", hover: "hover:bg-purple-500/40" },
+            alkali: { name: "Alcalinos", bg: "bg-red-500/20 border-red-500/40 text-red-300", hover: "hover:bg-red-500/40" },
+            alkaline: { name: "Alcalinotérreos", bg: "bg-orange-500/20 border-orange-500/40 text-orange-300", hover: "hover:bg-orange-500/40" },
+            metalloid: { name: "Metaloides", bg: "bg-teal-500/20 border-teal-500/40 text-teal-300", hover: "hover:bg-teal-500/40" },
+            halogen: { name: "Halógenos", bg: "bg-indigo-500/20 border-indigo-500/40 text-indigo-300", hover: "hover:bg-indigo-500/40" },
+            transition: { name: "Metales Transición", bg: "bg-yellow-500/20 border-yellow-500/40 text-yellow-300", hover: "hover:bg-yellow-500/40" },
+            post_transition: { name: "Otros Metales", bg: "bg-emerald-500/20 border-emerald-500/40 text-emerald-300", hover: "hover:bg-emerald-500/40" },
+            lanthanide: { name: "Lantánidos", bg: "bg-pink-500/20 border-pink-500/40 text-pink-300", hover: "hover:bg-pink-500/40" },
+            actinide: { name: "Actínidos", bg: "bg-rose-500/20 border-rose-500/40 text-rose-300", hover: "hover:bg-rose-500/40" }
+        };
+
+        let currentTab = 'study';
+        let activeCategoryFilter = null;
+        let practiceList = [...elementsData];
+        let practiceIndex = 0;
+        let isCardFlipped = false;
+
+        // Exam State
+        let quizQuestions = [];
+        let currentQuizIndex = 0;
+        let quizScore = { correct: 0, incorrect: 0 };
+        let quizTimerInterval = null;
+
+        window.onload = function () {
+            renderLegend();
+            renderPeriodicTable();
+            setupPracticeCard();
+        };
+
+        function switchTab(tab) {
+            currentTab = tab;
+            ['study', 'practice', 'exam'].forEach(t => {
+                const btn = document.getElementById(`nav-${t}`);
+                const sec = document.getElementById(`section-${t}`);
+                if (t === tab) {
+                    btn.className = "nav-btn flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all text-white bg-indigo-600 shadow";
+                    sec.classList.remove('hidden');
+                } else {
+                    btn.className = "nav-btn flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/50";
+                    sec.classList.add('hidden');
+                }
+            });
+        }
+
+        function renderLegend() {
+            const container = document.getElementById('legend-container');
+            container.innerHTML = `<button onclick="toggleCategoryFilter(null)" class="text-[11px] px-2 py-0.5 rounded-md border border-slate-700 bg-slate-800 text-slate-200 font-medium hover:bg-slate-700">Todos</button>`;
+            
+            Object.keys(categoryMap).forEach(key => {
+                const cat = categoryMap[key];
+                container.innerHTML += `
+                    <button onclick="toggleCategoryFilter('${key}')" class="text-[10px] px-2 py-0.5 rounded-md border ${cat.bg} font-medium ${cat.hover}">
+                        ${cat.name}
+                    </button>
+                `;
+            });
+        }
+
+        function renderPeriodicTable() {
+            const mainGrid = document.getElementById('periodic-table-grid');
+            const lanthGrid = document.getElementById('lanthanides-grid');
+            const actGrid = document.getElementById('actinides-grid');
+
+            mainGrid.innerHTML = '';
+            lanthGrid.innerHTML = '';
+            actGrid.innerHTML = '';
+
+            // Main Grid (Periods 1-7, Groups 1-18 excluding 57-71 and 89-103)
+            for (let row = 1; row <= 7; row++) {
+                for (let col = 1; col <= 18; col++) {
+                    // Check special placeholders for Lanthanides/Actinides slots
+                    if (row === 6 && col === 3) {
+                        mainGrid.appendChild(createPlaceholderCell("57-71", "Lantánidos", "pink"));
+                        continue;
+                    }
+                    if (row === 7 && col === 3) {
+                        mainGrid.appendChild(createPlaceholderCell("89-103", "Actínidos", "rose"));
+                        continue;
+                    }
+
+                    const elem = elementsData.find(e => e.period === row && e.group === col && !isLanthanideOrActinide(e.num));
+                    if (elem) {
+                        mainGrid.appendChild(createElementCell(elem));
+                    } else {
+                        const empty = document.createElement('div');
+                        empty.className = "h-12 sm:h-14";
+                        mainGrid.appendChild(empty);
+                    }
+                }
+            }
+
+            // Lanthanides Row (57 to 71)
+            elementsData.filter(e => e.num >= 57 && e.num <= 71).forEach(elem => {
+                lanthGrid.appendChild(createElementCell(elem));
+            });
+
+            // Actinides Row (89 to 103)
+            elementsData.filter(e => e.num >= 89 && e.num <= 103).forEach(elem => {
+                actGrid.appendChild(createElementCell(elem));
+            });
+        }
+
+        function isLanthanideOrActinide(num) {
+            return (num >= 57 && num <= 71) || (num >= 89 && num <= 103);
+        }
+
+        function createPlaceholderCell(range, name, color) {
+            const cell = document.createElement('div');
+            cell.className = `h-12 sm:h-14 p-1 rounded border border-${color}-500/30 bg-${color}-500/10 flex flex-col items-center justify-center text-center text-${color}-300 font-bold select-none text-[9px]`;
+            cell.innerHTML = `<span>${range}</span><span class="text-[7px] truncate opacity-80">${name}</span>`;
+            return cell;
+        }
+
+        function createElementCell(elem) {
+            const cat = categoryMap[elem.category] || { bg: "bg-slate-800 border-slate-700 text-slate-300" };
+            const cell = document.createElement('div');
+            cell.id = `elem-cell-${elem.num}`;
+            cell.onclick = () => openModal(elem);
+            cell.className = `element-card h-12 sm:h-14 p-1 rounded border flex flex-col justify-between cursor-pointer select-none ${cat.bg}`;
+            cell.innerHTML = `
+                <div class="flex justify-between items-center text-[8px] font-bold opacity-80 leading-none">
+                    <span>${elem.num}</span>
+                </div>
+                <div class="text-center font-extrabold text-xs sm:text-sm leading-none">${elem.sym}</div>
+                <div class="text-[7px] truncate text-center font-medium opacity-90 leading-none">${elem.name}</div>
+            `;
+            return cell;
+        }
+
+        function filterElements() {
+            const query = document.getElementById('study-search').value.toLowerCase().trim();
+            elementsData.forEach(elem => {
+                const cell = document.getElementById(`elem-cell-${elem.num}`);
+                if (!cell) return;
+
+                const matchesQuery = !query || 
+                    elem.name.toLowerCase().includes(query) || 
+                    elem.sym.toLowerCase().includes(query) || 
+                    elem.num.toString() === query;
+
+                const matchesCat = !activeCategoryFilter || elem.category === activeCategoryFilter;
+
+                if (matchesQuery && matchesCat) {
+                    cell.style.opacity = "1";
+                    cell.style.filter = "none";
+                } else {
+                    cell.style.opacity = "0.2";
+                    cell.style.filter = "grayscale(100%)";
+                }
+            });
+        }
+
+        function toggleCategoryFilter(catKey) {
+            activeCategoryFilter = catKey;
+            filterElements();
+        }
+
+        // Modal inspector
+        function openModal(elem) {
+            const modal = document.getElementById('element-modal');
+            const card = document.getElementById('modal-card');
+
+            document.getElementById('modal-number').innerText = elem.num;
+            document.getElementById('modal-symbol').innerText = elem.sym;
+            document.getElementById('modal-name').innerText = elem.name;
+            document.getElementById('modal-category').innerText = categoryMap[elem.category]?.name || elem.category;
+            document.getElementById('modal-mass').innerText = `Masa Atómica: ${elem.mass} u`;
+            document.getElementById('modal-group-period').innerText = `Grupo ${elem.group}, Periodo ${elem.period}`;
+            document.getElementById('modal-num-display').innerText = elem.num;
+
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            card.classList.remove('scale-95');
+            card.classList.add('scale-100');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('element-modal');
+            const card = document.getElementById('modal-card');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            card.classList.remove('scale-100');
+            card.classList.add('scale-95');
+        }
+
+        function setupPracticeCard() {
+            if (practiceList.length === 0) return;
+            const elem = practiceList[practiceIndex];
+
+            document.getElementById('card-number-front').innerText = `#${elem.num}`;
+            document.getElementById('card-category-front').innerText = categoryMap[elem.category]?.name || 'Elemento';
+            document.getElementById('card-symbol-front').innerText = elem.sym;
+            document.getElementById('card-mass-front').innerText = `${elem.mass} u`;
+
+            document.getElementById('card-name-back').innerText = elem.name;
+            document.getElementById('card-symbol-back').innerText = `${elem.sym} (Número Atómico: ${elem.num})`;
+            document.getElementById('card-group-back').innerText = `Periodo ${elem.period}, Grupo ${elem.group}`;
+            document.getElementById('card-mass-back').innerText = `Masa: ${elem.mass} u`;
+
+            document.getElementById('practice-counter').innerText = `${practiceIndex + 1} / ${practiceList.length}`;
+
+            if (isCardFlipped) flipPracticeCard();
+        }
+
+        function flipPracticeCard() {
+            const card = document.getElementById('flashcard');
+            isCardFlipped = !isCardFlipped;
+            if (isCardFlipped) card.classList.add('rotate-y-180');
+            else card.classList.remove('rotate-y-180');
+        }
+
+        function nextPracticeCard() {
+            if (practiceList.length === 0) return;
+            practiceIndex = (practiceIndex + 1) % practiceList.length;
+            setupPracticeCard();
+        }
+
+        function prevPracticeCard() {
+            if (practiceList.length === 0) return;
+            practiceIndex = (practiceIndex - 1 + practiceList.length) % practiceList.length;
+            setupPracticeCard();
+        }
+
+        function randomizePracticeCard() {
+            if (practiceList.length === 0) return;
+            practiceIndex = Math.floor(Math.random() * practiceList.length);
+            setupPracticeCard();
+        }
+
+        function filterPracticeCategory() {
+            const cat = document.getElementById('practice-filter').value;
+            if (cat === 'all') {
+                practiceList = [...elementsData];
+            } else {
+                practiceList = elementsData.filter(e => e.category === cat);
+            }
+            practiceIndex = 0;
+            setupPracticeCard();
+        }
+
+        function startExam() {
+            const mode = document.querySelector('input[name="exam-type"]:checked').value;
+            const count = parseInt(document.getElementById('exam-count').value);
+
+            const shuffled = [...elementsData].sort(() => Math.random() - 0.5).slice(0, Math.min(count, elementsData.length));
+
+            quizQuestions = shuffled.map(elem => {
+                let qType = mode;
+                if (mode === 'mixed') {
+                    const types = ['elem_to_sym_num', 'num_to_name_sym', 'sym_to_name_num'];
+                    qType = types[Math.floor(Math.random() * types.length)];
+                }
+                return { elem, qType, userAnswers: {}, isCorrect: false };
+            });
+
+            currentQuizIndex = 0;
+            quizScore = { correct: 0, incorrect: 0 };
+
+            document.getElementById('exam-setup').classList.add('hidden');
+            document.getElementById('exam-results').classList.add('hidden');
+            document.getElementById('exam-active').classList.remove('hidden');
+
+            renderQuizQuestion();
+        }
+
+        function renderQuizQuestion() {
+            clearInterval(quizTimerInterval);
+            const q = quizQuestions[currentQuizIndex];
+            const elem = q.elem;
+
+            document.getElementById('quiz-feedback').classList.add('hidden');
+            document.getElementById('quiz-submit-btn').classList.remove('hidden');
+            document.getElementById('quiz-next-btn').classList.add('hidden');
+
+            document.getElementById('quiz-progress').innerText = `Pregunta ${currentQuizIndex + 1} de ${quizQuestions.length}`;
+            document.getElementById('quiz-score-correct').innerText = quizScore.correct;
+            document.getElementById('quiz-score-incorrect').innerText = quizScore.incorrect;
+
+            const title = document.getElementById('quiz-question-title');
+            const mainPrompt = document.getElementById('quiz-prompt-main');
+            const subPrompt = document.getElementById('quiz-prompt-sub');
+            const inputsContainer = document.getElementById('quiz-inputs-container');
+            inputsContainer.innerHTML = '';
+
+            subPrompt.innerText = `Categoría: ${categoryMap[elem.category]?.name || 'General'}`;
+
+            if (q.qType === 'elem_to_sym_num') {
+                title.innerText = "Dado el Nombre -> Responde Símbolo y N° Atómico";
+                mainPrompt.innerText = elem.name;
+
+                inputsContainer.innerHTML = `
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-400 mb-1">Símbolo Químico</label>
+                        <input type="text" id="ans-sym" required placeholder="Ej: Fe" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:border-indigo-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-400 mb-1">Número Atómico</label>
+                        <input type="number" id="ans-num" required placeholder="Ej: 26" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:border-indigo-500 outline-none">
+                    </div>
+                `;
+            } else if (q.qType === 'num_to_name_sym') {
+                title.innerText = "Dado el N° Atómico -> Responde Nombre y Símbolo";
+                mainPrompt.innerText = `Número Atómico: ${elem.num}`;
+
+                inputsContainer.innerHTML = `
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-400 mb-1">Nombre del Elemento</label>
+                        <input type="text" id="ans-name" required placeholder="Ej: Hierro" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:border-indigo-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-400 mb-1">Símbolo Químico</label>
+                        <input type="text" id="ans-sym" required placeholder="Ej: Fe" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:border-indigo-500 outline-none">
+                    </div>
+                `;
+            } else if (q.qType === 'sym_to_name_num') {
+                title.innerText = "Dado el Símbolo -> Responde Nombre y N° Atómico";
+                mainPrompt.innerText = elem.sym;
+
+                inputsContainer.innerHTML = `
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-400 mb-1">Nombre del Elemento</label>
+                        <input type="text" id="ans-name" required placeholder="Ej: Hierro" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:border-indigo-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-400 mb-1">Número Atómico</label>
+                        <input type="number" id="ans-num" required placeholder="Ej: 26" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:border-indigo-500 outline-none">
+                    </div>
+                `;
+            }
+
+            const initialTime = parseInt(document.getElementById('exam-timer').value);
+            if (initialTime > 0) {
+                document.getElementById('quiz-timer-display').classList.remove('hidden');
+                let count = initialTime;
+                document.getElementById('quiz-timer-count').innerText = count;
+
+                quizTimerInterval = setInterval(() => {
+                    count--;
+                    document.getElementById('quiz-timer-count').innerText = count;
+                    if (count <= 0) {
+                        clearInterval(quizTimerInterval);
+                        autoSubmitTimeout();
+                    }
+                }, 1000);
+            } else {
+                document.getElementById('quiz-timer-display').classList.add('hidden');
+            }
+        }
+
+        function submitExamAnswer(e) {
+            if (e) e.preventDefault();
+            clearInterval(quizTimerInterval);
+
+            const q = quizQuestions[currentQuizIndex];
+            const elem = q.elem;
+            let correct = true;
+
+            const nameInput = document.getElementById('ans-name');
+            const symInput = document.getElementById('ans-sym');
+            const numInput = document.getElementById('ans-num');
+
+            if (nameInput) {
+                const val = nameInput.value.trim().toLowerCase();
+                q.userAnswers.name = val;
+                if (val !== elem.name.toLowerCase()) correct = false;
+            }
+
+            if (symInput) {
+                const val = symInput.value.trim().toLowerCase();
+                q.userAnswers.sym = val;
+                if (val !== elem.sym.toLowerCase()) correct = false;
+            }
+
+            if (numInput) {
+                const val = parseInt(numInput.value);
+                q.userAnswers.num = val;
+                if (val !== elem.num) correct = false;
+            }
+
+            q.isCorrect = correct;
+            if (correct) quizScore.correct++;
+            else quizScore.incorrect++;
+
+            showFeedback(correct, elem);
+        }
+
+        function autoSubmitTimeout() {
+            const q = quizQuestions[currentQuizIndex];
+            q.isCorrect = false;
+            quizScore.incorrect++;
+            showFeedback(false, q.elem, true);
+        }
+
+        function showFeedback(isCorrect, elem, isTimeout = false) {
+            document.getElementById('quiz-submit-btn').classList.add('hidden');
+            document.getElementById('quiz-next-btn').classList.remove('hidden');
+
+            const feedback = document.getElementById('quiz-feedback');
+            const icon = document.getElementById('quiz-feedback-icon');
+            const title = document.getElementById('quiz-feedback-title');
+            const detail = document.getElementById('quiz-feedback-detail');
+
+            feedback.classList.remove('hidden', 'bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-300', 'bg-rose-500/10', 'border-rose-500/30', 'text-rose-300');
+
+            if (isCorrect) {
+                feedback.classList.add('bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-300');
+                icon.className = "fa-solid fa-circle-check text-emerald-400 text-base mt-0.5";
+                title.innerText = "¡Correcto!";
+                detail.innerText = `Respuesta exacta: ${elem.name} (${elem.sym}) con N° Atómico ${elem.num}.`;
+            } else {
+                feedback.classList.add('bg-rose-500/10', 'border-rose-500/30', 'text-rose-300');
+                icon.className = "fa-solid fa-circle-xmark text-rose-400 text-base mt-0.5";
+                title.innerText = isTimeout ? "¡Tiempo Agotado!" : "Incorrecto";
+                detail.innerText = `Datos correctos -> Nombre: ${elem.name} | Símbolo: ${elem.sym} | N° Atómico: ${elem.num}`;
+            }
+        }
+
+        function nextQuizQuestion() {
+            currentQuizIndex++;
+            if (currentQuizIndex < quizQuestions.length) renderQuizQuestion();
+            else finishExam();
+        }
+
+        function finishExam() {
+            document.getElementById('exam-active').classList.add('hidden');
+            document.getElementById('exam-results').classList.remove('hidden');
+
+            const total = quizQuestions.length;
+            const pct = Math.round((quizScore.correct / total) * 100);
+
+            document.getElementById('results-score-pct').innerText = `${pct}%`;
+            document.getElementById('results-score-correct').innerText = quizScore.correct;
+            document.getElementById('results-score-incorrect').innerText = quizScore.incorrect;
+
+            const breakdown = document.getElementById('results-breakdown');
+            breakdown.innerHTML = '';
+
+            quizQuestions.forEach((q, idx) => {
+                const item = document.createElement('div');
+                item.className = `p-2.5 rounded-lg border text-xs flex justify-between items-center ${q.isCorrect ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-200' : 'bg-rose-500/10 border-rose-500/20 text-rose-200'}`;
+                item.innerHTML = `
+                    <div>
+                        <span class="font-bold">#${idx + 1} ${q.elem.name} (${q.elem.sym})</span>
+                        <span class="text-[10px] block text-slate-400">N° Atómico: ${q.elem.num}</span>
+                    </div>
+                    <span class="font-bold text-[11px]">${q.isCorrect ? '<i class="fa-solid fa-check text-emerald-400"></i> Correcto' : '<i class="fa-solid fa-xmark text-rose-400"></i> Incorrecto'}</span>
+                `;
+                breakdown.appendChild(item);
+            });
+        }
+
+        function resetExam() {
+            document.getElementById('exam-results').classList.add('hidden');
+            document.getElementById('exam-setup').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
