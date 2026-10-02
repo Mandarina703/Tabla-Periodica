@@ -70,6 +70,22 @@
             50% { box-shadow: 0 0 25px rgba(99, 102, 241, 0.8); }
         }
         .glow-active { animation: pulse-glow 2s infinite; }
+
+        /* Estilos Modo Admin basados en geo._3.txt */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.75);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(6px);
+        }
+        .admin-tab-btn.active {
+            background-color: #3b82f6;
+            color: #ffffff;
+        }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
@@ -95,6 +111,12 @@
                 <button id="sound-btn" onclick="toggleSound()" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-all border border-slate-700 text-xs flex items-center gap-1.5" title="Activar/Desactivar Sonido">
                     <i id="sound-icon" class="fa-solid fa-volume-high text-indigo-400"></i>
                     <span class="hidden sm:inline text-[11px] font-medium">Sonido</span>
+                </button>
+
+                <!-- Admin Button (Adaptado del segundo archivo) -->
+                <button onclick="openAdminModal()" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-all border border-slate-700 text-xs flex items-center gap-1.5" title="Modo Admin">
+                    <i class="fa-solid fa-user-gear text-indigo-400"></i>
+                    <span class="hidden sm:inline text-[11px] font-medium">Modo Admin</span>
                 </button>
 
                 <!-- Navigation Tabs -->
@@ -425,7 +447,7 @@
                 <span>Desarrollado con</span>
                 <i class="fa-solid fa-heart text-rose-500"></i>
                 <span>por</span>
-                <span class="font-semibold text-indigo-400">Félix y Hugo ]</span>
+                <span class="font-semibold text-indigo-400">Félix y Hugo </span>
             </p>
             <p class="text-[11px] text-slate-500">
                 Datos atómicos basados en el estándar de la IUPAC • © 2026 Todos los derechos reservados
@@ -466,6 +488,79 @@
                 <div>
                     <span class="text-slate-500 block text-[10px]">Número Atómico</span>
                     <span id="modal-num-display" class="font-semibold text-slate-200">1</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE MODO ADMIN (Estructura tomada de geo._3.txt) -->
+    <div id="adminModal" class="modal">
+        <div class="bg-slate-800 border border-slate-700 rounded-xl max-w-2xl w-full p-6 shadow-2xl relative text-slate-100 mx-4 max-h-[90vh] flex flex-col">
+            <button onclick="closeAdminModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            
+            <div id="adminLoginSection">
+                <h2 class="text-xl font-bold mb-4 flex items-center gap-2 text-indigo-400">
+                    <i class="fa-solid fa-lock"></i> Acceso Administrador
+                </h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Contraseña de Administrador</label>
+                        <input type="password" id="adminPassInput" placeholder="Introduce clave de acceso..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:border-indigo-500 outline-none">
+                    </div>
+                    <button onclick="loginAdmin()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg shadow transition-all">
+                        Iniciar Sesión
+                    </button>
+                </div>
+            </div>
+
+            <div id="adminDashboardSection" class="hidden flex-col flex-grow overflow-hidden">
+                <h2 class="text-xl font-bold mb-3 flex items-center gap-2 text-indigo-400">
+                    <i class="fa-solid fa-user-shield"></i> Panel de Control Admin
+                </h2>
+
+                <!-- Tabs Admin -->
+                <div class="flex gap-2 border-b border-slate-700 pb-2 mb-4">
+                    <button id="adminTabQuestions" onclick="switchAdminTab('questions')" class="admin-tab-btn active px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-slate-700 hover:bg-slate-600 text-slate-200">
+                        <i class="fa-solid fa-list-check mr-1"></i> Base de Elementos
+                    </button>
+                    <button id="adminTabStats" onclick="switchAdminTab('stats')" class="admin-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-slate-700 hover:bg-slate-600 text-slate-200">
+                        <i class="fa-solid fa-chart-pie mr-1"></i> Estado Sistema
+                    </button>
+                </div>
+
+                <!-- Tab Questions View -->
+                <div id="adminViewQuestions" class="flex-grow overflow-y-auto space-y-3 pr-1">
+                    <div class="flex justify-between items-center text-xs text-slate-400 mb-2">
+                        <span>Total de Elementos Cargados: <strong id="adminElemCount" class="text-white">118</strong></span>
+                    </div>
+                    <div id="adminElementsList" class="space-y-1.5 max-h-80 overflow-y-auto pr-1">
+                        <!-- Carga dinámica -->
+                    </div>
+                </div>
+
+                <!-- Tab Stats View -->
+                <div id="adminViewStats" class="hidden flex-grow overflow-y-auto space-y-4">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-slate-900 p-3 rounded-lg border border-slate-700 text-center">
+                            <span class="text-xs text-slate-400 block">Récord Guardado</span>
+                            <span id="adminStatRecord" class="text-lg font-bold text-amber-400">0 pts</span>
+                        </div>
+                        <div class="bg-slate-900 p-3 rounded-lg border border-slate-700 text-center">
+                            <span class="text-xs text-slate-400 block">Total Categorías</span>
+                            <span id="adminStatCats" class="text-lg font-bold text-indigo-400">10</span>
+                        </div>
+                    </div>
+                    <button onclick="resetHighScoreAdmin()" class="w-full py-2 bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 rounded-lg text-xs font-semibold transition-all">
+                        Resetear Récord Personal
+                    </button>
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-slate-700 flex justify-end">
+                    <button onclick="logoutAdmin()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-xs font-semibold">
+                        Cerrar Sesión Admin
+                    </button>
                 </div>
             </div>
         </div>
@@ -1328,7 +1423,90 @@
             document.getElementById('exam-results').classList.add('hidden');
             document.getElementById('exam-setup').classList.remove('hidden');
         }
-        
+
+        // FUNCIONALIDADES MODO ADMIN (Basado en la lógica del segundo archivo)
+        let isAdminLoggedIn = false;
+
+        function openAdminModal() {
+            playSound('click');
+            document.getElementById('adminModal').style.display = 'flex';
+        }
+
+        function closeAdminModal() {
+            playSound('click');
+            document.getElementById('adminModal').style.display = 'none';
+        }
+
+        function loginAdmin() {
+            const pass = document.getElementById('adminPassInput').value;
+            // Clave '1234' por defecto basada en geo._3.txt
+            if (pass === '0105') {
+                isAdminLoggedIn = true;
+                playSound('click');
+                document.getElementById('adminLoginSection').classList.add('hidden');
+                document.getElementById('adminDashboardSection').classList.remove('hidden');
+                document.getElementById('adminDashboardSection').classList.add('flex');
+                loadAdminData();
+            } else {
+                playSound('wrong');
+                alert('Contraseña incorrecta');
+            }
+        }
+
+        function logoutAdmin() {
+            isAdminLoggedIn = false;
+            document.getElementById('adminPassInput').value = '';
+            document.getElementById('adminDashboardSection').classList.add('hidden');
+            document.getElementById('adminDashboardSection').classList.remove('flex');
+            document.getElementById('adminLoginSection').classList.remove('hidden');
+            closeAdminModal();
+        }
+
+        function switchAdminTab(tab) {
+            playSound('click');
+            document.querySelectorAll('.admin-tab-btn').forEach(btn => btn.classList.remove('active'));
+            if (tab === 'questions') {
+                document.getElementById('adminTabQuestions').classList.add('active');
+                document.getElementById('adminViewQuestions').classList.remove('hidden');
+                document.getElementById('adminViewStats').classList.add('hidden');
+            } else {
+                document.getElementById('adminTabStats').classList.add('active');
+                document.getElementById('adminViewQuestions').classList.add('hidden');
+                document.getElementById('adminViewStats').classList.remove('hidden');
+            }
+        }
+
+        function loadAdminData() {
+            document.getElementById('adminElemCount').innerText = elementsData.length;
+            const listContainer = document.getElementById('adminElementsList');
+            listContainer.innerHTML = '';
+
+            elementsData.forEach(e => {
+                const row = document.createElement('div');
+                row.className = 'p-2 rounded bg-slate-900 border border-slate-700/60 flex justify-between items-center text-xs';
+                row.innerHTML = `
+                    <div>
+                        <span class="font-bold text-indigo-400">#${e.num} ${e.name} (${e.sym})</span>
+                        <span class="text-[10px] text-slate-400 block">Categoría: ${categoryMap[e.category]?.name || e.category}</span>
+                    </div>
+                    <span class="text-[10px] text-emerald-400 font-mono">${e.mass} u</span>
+                `;
+                listContainer.appendChild(row);
+            });
+
+            const best = localStorage.getItem('pt_exam_high_score') || '0';
+            document.getElementById('adminStatRecord').innerText = `${best} pts`;
+            document.getElementById('adminStatCats').innerText = Object.keys(categoryMap).length;
+        }
+
+        function resetHighScoreAdmin() {
+            if (confirm('¿Seguro que deseas reiniciar tu récord personal?')) {
+                localStorage.removeItem('pt_exam_high_score');
+                document.getElementById('high-score-box').classList.add('hidden');
+                document.getElementById('adminStatRecord').innerText = '0 pts';
+                playSound('click');
+            }
+        }
     </script>
 </body>
 </html>
