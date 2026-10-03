@@ -133,6 +133,10 @@
                         <i class="fa-solid fa-graduation-cap text-xs"></i>
                         <span>Examen</span>
                     </button>
+                    <button id="nav-tierlist" onclick="switchTab('tierlist')" class="nav-btn flex items-center space-x-2 px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/50">
+                        <i class="fa-solid fa-list-ol text-xs"></i>
+                        <span>Tier List</span>
+                    </button>
                 </nav>
             </div>
         </div>
@@ -428,14 +432,58 @@
                     <span><i class="fa-solid fa-gift text-emerald-400"></i> Bonos Exactos: <strong id="results-bonuses-total" class="text-white">+0 pts</strong></span>
                 </div>
 
+                <!-- Opciones Finales: Guardar puntuación o Reiniciar -->
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Opciones de Finalización</h3>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <input type="text" id="player-name-input" placeholder="Tu nombre o Nickname..." class="flex-grow bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:border-indigo-500 outline-none">
+                        <button onclick="saveExamScore()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow text-xs transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-floppy-disk"></i> Guardar Puntuación
+                        </button>
+                    </div>
+                </div>
+
                 <div class="text-left space-y-1.5">
                     <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Desglose Detallado por Pregunta</h4>
                     <div id="results-breakdown" class="max-h-60 overflow-y-auto space-y-1.5 pr-1"></div>
                 </div>
 
                 <button onclick="resetExam()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-lg transition-all text-xs flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-rotate-right"></i> Intentar Nuevamente
+                    <i class="fa-solid fa-rotate-right"></i> Reiniciar Examen
                 </button>
+            </div>
+        </section>
+
+        <!-- TIER LIST SECTION -->
+        <section id="section-tierlist" class="hidden space-y-6 max-w-3xl mx-auto">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+                <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-800">
+                    <div>
+                        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-trophy text-amber-400"></i> Clasificación / Tier List
+                        </h2>
+                        <p class="text-slate-400 text-xs">Las mejores puntuaciones registradas en el Modo Examen</p>
+                    </div>
+                    <button onclick="clearTierList()" class="px-3 py-1.5 bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5">
+                        <i class="fa-solid fa-trash-can"></i> Limpiar Tabla
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead>
+                            <tr class="border-b border-slate-800 text-slate-400 uppercase text-[10px]">
+                                <th class="pb-3 pl-2">Pos.</th>
+                                <th class="pb-3">Jugador</th>
+                                <th class="pb-3 text-right">Puntuación</th>
+                                <th class="pb-3 text-right pr-2">Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tierlist-table-body" class="divide-y divide-slate-800/50">
+                            <!-- Carga dinámica -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </section>
     </main>
@@ -493,7 +541,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE MODO ADMIN (Estructura tomada de geo._3.txt) -->
+    <!-- MODAL DE MODO ADMIN (Estructura adaptada) -->
     <div id="adminModal" class="modal">
         <div class="bg-slate-800 border border-slate-700 rounded-xl max-w-2xl w-full p-6 shadow-2xl relative text-slate-100 mx-4 max-h-[90vh] flex flex-col">
             <button onclick="closeAdminModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg">
@@ -521,22 +569,54 @@
                 </h2>
 
                 <!-- Tabs Admin -->
-                <div class="flex gap-2 border-b border-slate-700 pb-2 mb-4">
+                <div class="flex flex-wrap gap-2 border-b border-slate-700 pb-2 mb-4">
                     <button id="adminTabQuestions" onclick="switchAdminTab('questions')" class="admin-tab-btn active px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-slate-700 hover:bg-slate-600 text-slate-200">
                         <i class="fa-solid fa-list-check mr-1"></i> Base de Elementos
+                    </button>
+                    <button id="adminTabPoints" onclick="switchAdminTab('points')" class="admin-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-slate-700 hover:bg-slate-600 text-slate-200">
+                        <i class="fa-solid fa-plus-minus mr-1"></i> Añadir Puntos
+                    </button>
+                    <button id="adminTabTierlist" onclick="switchAdminTab('tierlist')" class="admin-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-slate-700 hover:bg-slate-600 text-slate-200">
+                        <i class="fa-solid fa-trophy mr-1"></i> Moderación Tierlist
                     </button>
                     <button id="adminTabStats" onclick="switchAdminTab('stats')" class="admin-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-slate-700 hover:bg-slate-600 text-slate-200">
                         <i class="fa-solid fa-chart-pie mr-1"></i> Estado Sistema
                     </button>
                 </div>
 
-                <!-- Tab Questions View -->
+                <!-- Tab Questions / Elements View -->
                 <div id="adminViewQuestions" class="flex-grow overflow-y-auto space-y-3 pr-1">
-                    <div class="flex justify-between items-center text-xs text-slate-400 mb-2">
+                    <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2 text-xs text-slate-400 mb-2">
                         <span>Total de Elementos Cargados: <strong id="adminElemCount" class="text-white">118</strong></span>
+                        <div class="relative w-full sm:w-64">
+                            <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]"></i>
+                            <input type="text" id="admin-search-input" oninput="renderAdminElementsList()" placeholder="Buscar por número, nombre o símbolo..." class="w-full pl-8 pr-2 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white focus:border-indigo-500 outline-none">
+                        </div>
                     </div>
                     <div id="adminElementsList" class="space-y-1.5 max-h-80 overflow-y-auto pr-1">
-                        <!-- Carga dinámica -->
+                        <!-- Carga dinámica con opción de buscar -->
+                    </div>
+                </div>
+
+                <!-- Tab Añadir Puntos View -->
+                <div id="adminViewPoints" class="hidden flex-grow overflow-y-auto space-y-4 pr-1">
+                    <p class="text-xs text-slate-400">Añade puntos directamente al marcador actual del Modo Examen:</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="addExamPointsAdmin(500)" class="py-3 bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 border border-indigo-500/40 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-circle-plus"></i> +500 Puntos
+                        </button>
+                        <button onclick="addExamPointsAdmin(1000)" class="py-3 bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border border-purple-500/40 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-circle-plus"></i> +1000 Puntos
+                        </button>
+                    </div>
+                    <div id="adminPointsFeedback" class="text-xs font-semibold text-emerald-400 hidden text-center"></div>
+                </div>
+
+                <!-- Tab Moderación Tierlist View -->
+                <div id="adminViewTierlist" class="hidden flex-grow overflow-y-auto space-y-3 pr-1">
+                    <p class="text-xs text-slate-400">Modera las puntuaciones de los usuarios en la Tier List o edita sus datos:</p>
+                    <div id="adminTierlistContainer" class="space-y-2">
+                        <!-- Carga dinámica de items de la Tierlist para editar/moderar -->
                     </div>
                 </div>
 
@@ -801,11 +881,12 @@
             renderPeriodicTable();
             setupPracticeCard();
             loadHighScore();
+            renderTierList();
         };
 
         function switchTab(tab) {
             playSound('click');
-            ['study', 'practice', 'exam'].forEach(t => {
+            ['study', 'practice', 'exam', 'tierlist'].forEach(t => {
                 const btn = document.getElementById(`nav-${t}`);
                 const sec = document.getElementById(`section-${t}`);
                 if (t === tab) {
@@ -816,6 +897,7 @@
                     sec.classList.add('hidden');
                 }
             });
+            if (tab === 'tierlist') renderTierList();
         }
 
         function renderLegend() {
@@ -1178,26 +1260,32 @@
                 `;
             }
 
-            const firstInput = inputsContainer.querySelector('input');
-            if (firstInput) setTimeout(() => firstInput.focus(), 100);
+            // Focus on first input
+            setTimeout(() => {
+                const firstInput = inputsContainer.querySelector('input');
+                if (firstInput) firstInput.focus();
+            }, 50);
 
-            const initialTime = parseInt(document.getElementById('exam-timer').value);
-            currentTimerSeconds = initialTime;
+            // Timer Setup
+            const timerLimit = parseInt(document.getElementById('exam-timer').value);
+            const timerDisplay = document.getElementById('quiz-timer-display');
 
-            if (initialTime > 0) {
-                document.getElementById('quiz-timer-display').classList.remove('hidden');
+            if (timerLimit > 0) {
+                timerDisplay.classList.remove('hidden');
+                currentTimerSeconds = timerLimit;
                 document.getElementById('quiz-timer-count').innerText = currentTimerSeconds;
 
                 quizTimerInterval = setInterval(() => {
                     currentTimerSeconds--;
                     document.getElementById('quiz-timer-count').innerText = currentTimerSeconds;
+
                     if (currentTimerSeconds <= 0) {
                         clearInterval(quizTimerInterval);
-                        autoSubmitTimeout();
+                        handleExamTimeout();
                     }
                 }, 1000);
             } else {
-                document.getElementById('quiz-timer-display').classList.add('hidden');
+                timerDisplay.classList.add('hidden');
             }
         }
 
@@ -1208,118 +1296,106 @@
             const q = quizQuestions[currentQuizIndex];
             const elem = q.elem;
 
-            const nameInput = document.getElementById('ans-name');
+            let userSym = "";
+            let userName = "";
+            let userNum = null;
+
             const symInput = document.getElementById('ans-sym');
+            const nameInput = document.getElementById('ans-name');
             const numInput = document.getElementById('ans-num');
 
-            let isTextCorrect = true;
-            let numDiff = 0;
-            let earnedPoints = 0;
-            let exactBonus = 0;
-            let status = "incorrect";
+            if (symInput) userSym = symInput.value.trim();
+            if (nameInput) userName = nameInput.value.trim();
+            if (numInput) userNum = parseInt(numInput.value);
 
-            if (nameInput) {
-                q.userAnswers.name = nameInput.value.trim();
-                if (normalizeStr(nameInput.value) !== normalizeStr(elem.name)) {
-                    isTextCorrect = false;
-                }
+            q.userAnswers = { sym: userSym, name: userName, num: userNum };
+
+            // EVALUATION LOGIC
+            let textCorrect = false;
+            let points = 0;
+            let diff = 0;
+            let isExactBonus = false;
+
+            if (q.qType === 'elem_to_sym_num') {
+                textCorrect = (normalizeStr(userSym) === normalizeStr(elem.sym));
+            } else if (q.qType === 'sym_to_name_num') {
+                textCorrect = (normalizeStr(userName) === normalizeStr(elem.name));
+            } else if (q.qType === 'num_to_name_sym') {
+                textCorrect = (normalizeStr(userName) === normalizeStr(elem.name)) && (normalizeStr(userSym) === normalizeStr(elem.sym));
+                userNum = elem.num; // Exact
             }
 
-            if (symInput) {
-                q.userAnswers.sym = symInput.value.trim();
-                if (normalizeStr(symInput.value) !== normalizeStr(elem.sym)) {
-                    isTextCorrect = false;
-                }
-            }
-
-            if (!isTextCorrect) {
-                earnedPoints = 0;
-                status = "incorrect";
-                quizScore.streak = 0;
+            if (!textCorrect) {
+                q.status = 'incorrect';
+                points = 0;
                 quizScore.incorrect++;
+                quizScore.streak = 0;
                 playSound('wrong');
             } else {
-                if (numInput) {
-                    q.userAnswers.num = numInput.value.trim();
-                    const val = parseInt(numInput.value);
-
-                    if (isNaN(val)) {
-                        earnedPoints = 0;
-                        status = "incorrect";
-                        quizScore.streak = 0;
-                        quizScore.incorrect++;
-                        playSound('wrong');
-                    } else {
-                        numDiff = Math.abs(val - elem.num);
-
-                        if (numDiff === 0) {
-                            earnedPoints = 100;
-                            exactBonus = 50;
-                            status = "exact";
-                            quizScore.exact++;
-                            quizScore.streak++;
-                            playSound('exact');
-                            confetti({ particleCount: 30, spread: 60, origin: { y: 0.8 } });
-                        } else if (numDiff <= 5) {
-                            const pointsTable = { 1: 90, 2: 70, 3: 50, 4: 30, 5: 10 };
-                            earnedPoints = pointsTable[numDiff] || 0;
-                            status = "partial";
-                            quizScore.partial++;
-                            quizScore.streak++;
-                            playSound('partial');
-                        } else {
-                            earnedPoints = 0;
-                            status = "incorrect";
-                            quizScore.streak = 0;
-                            quizScore.incorrect++;
-                            playSound('wrong');
-                        }
-                    }
+                if (q.qType === 'num_to_name_sym') {
+                    diff = 0;
+                    points = 100;
+                    isExactBonus = true;
                 } else {
-                    earnedPoints = 100;
-                    exactBonus = 50;
-                    status = "exact";
-                    quizScore.exact++;
+                    if (isNaN(userNum)) {
+                        diff = 99;
+                        points = 0;
+                    } else {
+                        diff = Math.abs(userNum - elem.num);
+                        if (diff === 0) points = 100;
+                        else if (diff === 1) points = 90;
+                        else if (diff === 2) points = 70;
+                        else if (diff === 3) points = 50;
+                        else if (diff === 4) points = 30;
+                        else if (diff === 5) points = 10;
+                        else points = 0;
+                    }
+                }
+
+                if (points > 0) {
+                    if (diff === 0) {
+                        isExactBonus = true;
+                        points += 50; // Exact match bonus
+                        quizScore.exact++;
+                        quizScore.totalBonuses += 50;
+                        playSound('exact');
+                        confetti({ particleCount: 30, spread: 60, origin: { y: 0.8 } });
+                    } else {
+                        quizScore.partial++;
+                        playSound('partial');
+                    }
+                    q.status = 'correct';
                     quizScore.streak++;
-                    playSound('exact');
-                    confetti({ particleCount: 30, spread: 60, origin: { y: 0.8 } });
+                    if (quizScore.streak > quizScore.maxStreak) quizScore.maxStreak = quizScore.streak;
+                } else {
+                    q.status = 'incorrect';
+                    quizScore.incorrect++;
+                    quizScore.streak = 0;
+                    playSound('wrong');
                 }
             }
 
-            if (quizScore.streak > quizScore.maxStreak) {
-                quizScore.maxStreak = quizScore.streak;
-            }
+            q.pointsEarned = points;
+            q.numDiff = diff;
+            q.exactBonus = isExactBonus;
 
-            const totalQuestionPoints = earnedPoints + exactBonus;
-            quizScore.points += totalQuestionPoints;
-            quizScore.totalBonuses += exactBonus;
+            quizScore.points += points;
 
-            q.status = status;
-            q.pointsEarned = totalQuestionPoints;
-            q.numDiff = numDiff;
-            q.exactBonus = (exactBonus > 0);
-
-            document.getElementById('quiz-total-points').innerText = quizScore.points;
-            document.getElementById('quiz-streak').innerText = quizScore.streak;
-
-            showFeedback(status, elem, earnedPoints, exactBonus, numDiff, isTextCorrect);
+            showExamFeedback(q);
         }
 
-        function autoSubmitTimeout() {
-            playSound('wrong');
+        function handleExamTimeout() {
             const q = quizQuestions[currentQuizIndex];
             q.status = 'incorrect';
             q.pointsEarned = 0;
-            quizScore.streak = 0;
             quizScore.incorrect++;
+            quizScore.streak = 0;
+            playSound('wrong');
 
-            document.getElementById('quiz-total-points').innerText = quizScore.points;
-            document.getElementById('quiz-streak').innerText = quizScore.streak;
-
-            showFeedback('timeout', q.elem, 0, 0, 0, false);
+            showExamFeedback(q, true);
         }
 
-        function showFeedback(status, elem, basePts, bonusPts, numDiff, isTextCorrect) {
+        function showExamFeedback(q, isTimeout = false) {
             document.getElementById('quiz-submit-btn').classList.add('hidden');
             document.getElementById('quiz-next-btn').classList.remove('hidden');
 
@@ -1331,45 +1407,42 @@
 
             feedback.classList.remove('hidden', 'bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-300', 'bg-amber-500/10', 'border-amber-500/30', 'text-amber-300', 'bg-rose-500/10', 'border-rose-500/30', 'text-rose-300');
 
-            if (status === 'exact') {
+            if (q.status === 'correct' && q.exactBonus) {
                 feedback.classList.add('bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-300');
                 icon.className = "fa-solid fa-circle-check text-emerald-400 text-xl mt-0.5";
-                title.innerText = `¡EXACTO PERFECTO! (+${basePts + bonusPts} Puntos)`;
-                detail.innerText = `Acierto impecable: ${elem.name} (${elem.sym}) - N° Atómico: ${elem.num}`;
-                breakdown.innerText = `Desglose: ${basePts} pts de precisión + 50 pts Bonificación Exacta`;
-            } else if (status === 'partial') {
+                title.innerText = "¡Acierto Exacto Perfecto! (+150 pts)";
+                detail.innerText = `Elemento correcto: ${q.elem.name} (${q.elem.sym}), N° Atómico: ${q.elem.num}.`;
+                breakdown.innerText = `Base: 100 pts + Bonificación Exacta: +50 pts`;
+            } else if (q.status === 'correct' && !q.exactBonus) {
                 feedback.classList.add('bg-amber-500/10', 'border-amber-500/30', 'text-amber-300');
                 icon.className = "fa-solid fa-triangle-exclamation text-amber-400 text-xl mt-0.5";
-                title.innerText = `¡ACEPTADO CON MARGEN ±${numDiff}! (+${basePts} Puntos)`;
-                detail.innerText = `El símbolo/nombre era correcto. En el N° Atómico te quedaste a una diferencia de ${numDiff} (Real: ${elem.num}).`;
-                breakdown.innerText = `Desglose: ${basePts} pts por cercanía en N° Atómico (sin bono exacto)`;
-            } else if (status === 'timeout') {
-                feedback.classList.add('bg-rose-500/10', 'border-rose-500/30', 'text-rose-300');
-                icon.className = "fa-solid fa-clock text-rose-400 text-xl mt-0.5";
-                title.innerText = "¡TIEMPO AGOTADO! (0 Puntos)";
-                detail.innerText = `Respuesta correcta -> ${elem.name} (${elem.sym}) - N° Atómico: ${elem.num}`;
-                breakdown.innerText = `Desglose: 0 pts`;
+                title.innerText = `Acierto con Margen de Error (Diferencia N°: ±${q.numDiff})`;
+                detail.innerText = `Correcto: ${q.elem.name} (${q.elem.sym}), N° Atómico real: ${q.elem.num} (Ingresaste: ${q.userAnswers.num}).`;
+                breakdown.innerText = `Puntos obtenidos por cercanía: +${q.pointsEarned} pts`;
             } else {
                 feedback.classList.add('bg-rose-500/10', 'border-rose-500/30', 'text-rose-300');
                 icon.className = "fa-solid fa-circle-xmark text-rose-400 text-xl mt-0.5";
-                title.innerText = "FALLO DE PRECISIÓN (0 Puntos)";
-                if (!isTextCorrect) {
-                    detail.innerText = `El Símbolo o Nombre del elemento no fue correcto. Se requieren datos exactos. Elemento real: ${elem.name} (${elem.sym}).`;
-                } else {
-                    detail.innerText = `El N° atómico superó el margen de error permitido (±5). N° atómico real: ${elem.num}.`;
-                }
-                breakdown.innerText = `Desglose: 0 pts`;
+                title.innerText = isTimeout ? "¡Tiempo Agotado! (0 pts)" : "Respuesta Incorrecta (0 pts)";
+                detail.innerText = `La respuesta correcta era: ${q.elem.name} (${q.elem.sym}) con N° Atómico ${q.elem.num}.`;
+                breakdown.innerText = `Puntos obtenidos: 0 pts`;
             }
+
+            document.getElementById('quiz-total-points').innerText = quizScore.points;
+            document.getElementById('quiz-streak').innerText = quizScore.streak;
         }
 
         function nextQuizQuestion() {
-            playSound('click');
             currentQuizIndex++;
-            if (currentQuizIndex < quizQuestions.length) renderQuizQuestion();
-            else finishExam();
+            if (currentQuizIndex < quizQuestions.length) {
+                renderQuizQuestion();
+            } else {
+                finishExam();
+            }
         }
 
         function finishExam() {
+            clearInterval(quizTimerInterval);
+
             document.getElementById('exam-active').classList.add('hidden');
             document.getElementById('exam-results').classList.remove('hidden');
 
@@ -1380,131 +1453,278 @@
             document.getElementById('results-max-streak').innerText = quizScore.maxStreak;
             document.getElementById('results-bonuses-total').innerText = `+${quizScore.totalBonuses} pts`;
 
-            const prevHigh = parseInt(localStorage.getItem('pt_exam_high_score') || '0');
-            if (quizScore.points > prevHigh) {
-                localStorage.setItem('pt_exam_high_score', quizScore.points.toString());
+            // Breakdown
+            const breakdownContainer = document.getElementById('results-breakdown');
+            breakdownContainer.innerHTML = '';
+
+            quizQuestions.forEach((q, idx) => {
+                const div = document.createElement('div');
+                div.className = "p-2 rounded-lg bg-slate-950 border border-slate-800 flex justify-between items-center text-xs";
+
+                let badge = "";
+                if (q.status === 'correct' && q.exactBonus) badge = `<span class="text-emerald-400 font-bold">+${q.pointsEarned} pts (Exacto)</span>`;
+                else if (q.status === 'correct') badge = `<span class="text-amber-400 font-bold">+${q.pointsEarned} pts (Diff ±${q.numDiff})</span>`;
+                else badge = `<span class="text-rose-400 font-bold">0 pts</span>`;
+
+                div.innerHTML = `
+                    <div class="truncate">
+                        <span class="text-slate-500 font-mono">#${idx + 1}</span>
+                        <strong class="text-white ml-1">${q.elem.name} (${q.elem.sym})</strong>
+                        <span class="text-[10px] text-slate-400"> - N°: ${q.elem.num}</span>
+                    </div>
+                    <div>${badge}</div>
+                `;
+                breakdownContainer.appendChild(div);
+            });
+
+            // Check high score
+            const currentBest = parseInt(localStorage.getItem('pt_exam_high_score') || '0');
+            if (quizScore.points > currentBest) {
+                localStorage.setItem('pt_exam_high_score', quizScore.points);
                 loadHighScore();
                 confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
             }
+        }
 
-            const breakdown = document.getElementById('results-breakdown');
-            breakdown.innerHTML = '';
+        function saveExamScore() {
+            const input = document.getElementById('player-name-input');
+            const playerName = input.value.trim() || 'Jugador Anónimo';
 
-            quizQuestions.forEach((q, idx) => {
-                const item = document.createElement('div');
-                let badgeBg = 'bg-rose-500/10 border-rose-500/20 text-rose-200';
-                let icon = '<i class="fa-solid fa-xmark text-rose-400"></i> Fallo';
-
-                if (q.status === 'exact') {
-                    badgeBg = 'bg-emerald-500/10 border-emerald-500/20 text-emerald-200';
-                    icon = '<i class="fa-solid fa-check text-emerald-400"></i> Exacto (+50B)';
-                } else if (q.status === 'partial') {
-                    badgeBg = 'bg-amber-500/10 border-amber-500/20 text-amber-200';
-                    icon = `<i class="fa-solid fa-triangle-exclamation text-amber-400"></i> Margen (±${q.numDiff})`;
-                }
-
-                item.className = `p-2.5 rounded-lg border text-xs flex justify-between items-center ${badgeBg}`;
-                item.innerHTML = `
-                    <div>
-                        <span class="font-bold">#${idx + 1} ${q.elem.name} (${q.elem.sym})</span>
-                        <span class="text-[10px] block text-slate-400">N° Atómico Real: ${q.elem.num}</span>
-                    </div>
-                    <div class="text-right">
-                        <span class="font-bold text-[11px] block">${icon}</span>
-                        <span class="text-[10px] text-emerald-400 font-mono font-bold">+${q.pointsEarned} pts</span>
-                    </div>
-                `;
-                breakdown.appendChild(item);
+            const tierlist = JSON.parse(localStorage.getItem('pt_tierlist') || '[]');
+            tierlist.push({
+                name: playerName,
+                score: quizScore.points,
+                date: new Date().toLocaleDateString('es-ES')
             });
+
+            tierlist.sort((a, b) => b.score - a.score);
+            localStorage.setItem('pt_tierlist', JSON.stringify(tierlist));
+
+            alert(`Puntuación de ${quizScore.points} pts guardada para ${playerName}!`);
+            switchTab('tierlist');
         }
 
         function resetExam() {
-            playSound('click');
             document.getElementById('exam-results').classList.add('hidden');
             document.getElementById('exam-setup').classList.remove('hidden');
         }
 
-        // FUNCIONALIDADES MODO ADMIN (Basado en la lógica del segundo archivo)
-        let isAdminLoggedIn = false;
+        // TIER LIST SYSTEM
+        function renderTierList() {
+            const tbody = document.getElementById('tierlist-table-body');
+            const tierlist = JSON.parse(localStorage.getItem('pt_tierlist') || '[]');
 
+            tbody.innerHTML = '';
+
+            if (tierlist.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="py-4 text-center text-slate-500 italic">
+                            No hay puntuaciones registradas aún. ¡Completa un examen y guarda tu récord!
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tierlist.forEach((item, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-800/30 transition-all";
+
+                let medal = `<span class="font-mono text-slate-400">${idx + 1}</span>`;
+                if (idx === 0) medal = `<i class="fa-solid fa-crown text-amber-400"></i>`;
+                else if (idx === 1) medal = `<i class="fa-solid fa-medal text-slate-300"></i>`;
+                else if (idx === 2) medal = `<i class="fa-solid fa-medal text-amber-600"></i>`;
+
+                tr.innerHTML = `
+                    <td class="py-2.5 pl-2 font-bold">${medal}</td>
+                    <td class="py-2.5 font-semibold text-white">${item.name}</td>
+                    <td class="py-2.5 text-right font-mono font-bold text-amber-400">${item.score} pts</td>
+                    <td class="py-2.5 text-right pr-2 text-[10px] text-slate-400">${item.date}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function clearTierList() {
+            if (confirm("¿Estás seguro de que deseas borrar todas las puntuaciones de la Tier List?")) {
+                localStorage.removeItem('pt_tierlist');
+                renderTierList();
+                renderAdminTierList();
+            }
+        }
+
+        // MODO ADMIN SYSTEM (Tomado y adaptado del segundo archivo)
         function openAdminModal() {
-            playSound('click');
             document.getElementById('adminModal').style.display = 'flex';
         }
 
         function closeAdminModal() {
-            playSound('click');
             document.getElementById('adminModal').style.display = 'none';
         }
 
         function loginAdmin() {
             const pass = document.getElementById('adminPassInput').value;
-            // Clave '1234' por defecto basada en geo._3.txt
-            if (pass === '0105') {
-                isAdminLoggedIn = true;
-                playSound('click');
+            if (pass === '0105') { // Clave simple de demostración
                 document.getElementById('adminLoginSection').classList.add('hidden');
                 document.getElementById('adminDashboardSection').classList.remove('hidden');
                 document.getElementById('adminDashboardSection').classList.add('flex');
-                loadAdminData();
+                renderAdminElementsList();
+                renderAdminTierList();
+                updateAdminStats();
             } else {
-                playSound('wrong');
-                alert('Contraseña incorrecta');
+                alert('Contraseña incorrecta.');
             }
         }
 
         function logoutAdmin() {
-            isAdminLoggedIn = false;
             document.getElementById('adminPassInput').value = '';
+            document.getElementById('adminLoginSection').classList.remove('hidden');
             document.getElementById('adminDashboardSection').classList.add('hidden');
             document.getElementById('adminDashboardSection').classList.remove('flex');
-            document.getElementById('adminLoginSection').classList.remove('hidden');
             closeAdminModal();
         }
 
         function switchAdminTab(tab) {
-            playSound('click');
-            document.querySelectorAll('.admin-tab-btn').forEach(btn => btn.classList.remove('active'));
-            if (tab === 'questions') {
-                document.getElementById('adminTabQuestions').classList.add('active');
-                document.getElementById('adminViewQuestions').classList.remove('hidden');
-                document.getElementById('adminViewStats').classList.add('hidden');
-            } else {
-                document.getElementById('adminTabStats').classList.add('active');
-                document.getElementById('adminViewQuestions').classList.add('hidden');
-                document.getElementById('adminViewStats').classList.remove('hidden');
+            ['questions', 'points', 'tierlist', 'stats'].forEach(t => {
+                const capitalizedTab = t.charAt(0).toUpperCase() + t.slice(1);
+                const btn = document.getElementById(`adminTab${capitalizedTab}`);
+                const view = document.getElementById(`adminView${capitalizedTab}`);
+                if (btn && view) {
+                    if (t === tab) {
+                        btn.classList.add('active');
+                        view.classList.remove('hidden');
+                    } else {
+                        btn.classList.remove('active');
+                        view.classList.add('hidden');
+                    }
+                }
+            });
+        }
+
+        function renderAdminElementsList() {
+            const container = document.getElementById('adminElementsList');
+            const searchVal = normalizeStr(document.getElementById('admin-search-input')?.value || '');
+            
+            container.innerHTML = '';
+
+            const filtered = elementsData.filter(e => {
+                if (!searchVal) return true;
+                return normalizeStr(e.name).includes(searchVal) ||
+                       normalizeStr(e.sym).includes(searchVal) ||
+                       e.num.toString() === searchVal;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="text-xs text-slate-500 italic py-2 text-center">No se encontraron elementos con la búsqueda.</div>`;
+                return;
+            }
+
+            filtered.forEach(e => {
+                const div = document.createElement('div');
+                div.className = "p-2 rounded bg-slate-900 border border-slate-700 flex justify-between items-center text-xs";
+                div.innerHTML = `
+                    <div>
+                        <span class="font-bold text-indigo-400">#${e.num} ${e.sym}</span>
+                        <span class="text-white ml-2">${e.name}</span>
+                        <span class="text-[10px] text-slate-400 ml-2">(${categoryMap[e.category]?.name || e.category})</span>
+                    </div>
+                    <span class="text-[10px] font-mono text-amber-400">${e.mass} u</span>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function addExamPointsAdmin(pts) {
+            quizScore.points += pts;
+            document.getElementById('quiz-total-points').innerText = quizScore.points;
+            
+            const feedback = document.getElementById('adminPointsFeedback');
+            feedback.innerText = `¡Se han añadido +${pts} puntos al Modo Examen actual! (Total: ${quizScore.points} pts)`;
+            feedback.classList.remove('hidden');
+            
+            setTimeout(() => {
+                feedback.classList.add('hidden');
+            }, 3000);
+            
+            playSound('exact');
+        }
+
+        function renderAdminTierList() {
+            const container = document.getElementById('adminTierlistContainer');
+            if (!container) return;
+            
+            const tierlist = JSON.parse(localStorage.getItem('pt_tierlist') || '[]');
+            container.innerHTML = '';
+
+            if (tierlist.length === 0) {
+                container.innerHTML = `<div class="text-xs text-slate-500 italic py-2">La Tier List está vacía.</div>`;
+                return;
+            }
+
+            tierlist.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = "p-2.5 rounded bg-slate-900 border border-slate-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs";
+                
+                div.innerHTML = `
+                    <div class="flex items-center gap-2 flex-grow w-full sm:w-auto">
+                        <span class="font-mono font-bold text-slate-400 text-xs">#${index + 1}</span>
+                        <input type="text" value="${item.name}" onchange="updateTierListItem(${index}, 'name', this.value)" class="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-white focus:border-indigo-500 outline-none w-28 sm:w-36">
+                        <input type="number" value="${item.score}" onchange="updateTierListItem(${index}, 'score', parseInt(this.value))" class="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-amber-400 font-mono font-bold focus:border-indigo-500 outline-none w-20 sm:w-24">
+                        <span class="text-[10px] text-slate-400 hidden md:inline">${item.date}</span>
+                    </div>
+                    <div class="flex items-center gap-1 self-end sm:self-auto">
+                        <button onclick="adjustTierListScore(${index}, 100)" class="px-2 py-1 bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 border border-indigo-500/30 rounded text-[10px] font-bold" title="Añadir 100 pts">+100</button>
+                        <button onclick="adjustTierListScore(${index}, -100)" class="px-2 py-1 bg-rose-600/30 hover:bg-rose-600/50 text-rose-300 border border-rose-500/30 rounded text-[10px] font-bold" title="Restar 100 pts">-100</button>
+                        <button onclick="deleteTierListItem(${index})" class="px-2 py-1 bg-rose-600 hover:bg-rose-500 text-white rounded text-[10px]" title="Eliminar registro"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function updateTierListItem(index, field, value) {
+            const tierlist = JSON.parse(localStorage.getItem('pt_tierlist') || '[]');
+            if (tierlist[index]) {
+                tierlist[index][field] = value;
+                tierlist.sort((a, b) => b.score - a.score);
+                localStorage.setItem('pt_tierlist', JSON.stringify(tierlist));
+                renderAdminTierList();
+                renderTierList();
             }
         }
 
-        function loadAdminData() {
-            document.getElementById('adminElemCount').innerText = elementsData.length;
-            const listContainer = document.getElementById('adminElementsList');
-            listContainer.innerHTML = '';
+        function adjustTierListScore(index, delta) {
+            const tierlist = JSON.parse(localStorage.getItem('pt_tierlist') || '[]');
+            if (tierlist[index]) {
+                tierlist[index].score = Math.max(0, (tierlist[index].score || 0) + delta);
+                tierlist.sort((a, b) => b.score - a.score);
+                localStorage.setItem('pt_tierlist', JSON.stringify(tierlist));
+                renderAdminTierList();
+                renderTierList();
+            }
+        }
 
-            elementsData.forEach(e => {
-                const row = document.createElement('div');
-                row.className = 'p-2 rounded bg-slate-900 border border-slate-700/60 flex justify-between items-center text-xs';
-                row.innerHTML = `
-                    <div>
-                        <span class="font-bold text-indigo-400">#${e.num} ${e.name} (${e.sym})</span>
-                        <span class="text-[10px] text-slate-400 block">Categoría: ${categoryMap[e.category]?.name || e.category}</span>
-                    </div>
-                    <span class="text-[10px] text-emerald-400 font-mono">${e.mass} u</span>
-                `;
-                listContainer.appendChild(row);
-            });
+        function deleteTierListItem(index) {
+            const tierlist = JSON.parse(localStorage.getItem('pt_tierlist') || '[]');
+            if (tierlist[index]) {
+                tierlist.splice(index, 1);
+                localStorage.setItem('pt_tierlist', JSON.stringify(tierlist));
+                renderAdminTierList();
+                renderTierList();
+            }
+        }
 
+        function updateAdminStats() {
             const best = localStorage.getItem('pt_exam_high_score') || '0';
             document.getElementById('adminStatRecord').innerText = `${best} pts`;
-            document.getElementById('adminStatCats').innerText = Object.keys(categoryMap).length;
         }
 
         function resetHighScoreAdmin() {
-            if (confirm('¿Seguro que deseas reiniciar tu récord personal?')) {
+            if (confirm("¿Resetear récord personal almacenado?")) {
                 localStorage.removeItem('pt_exam_high_score');
                 document.getElementById('high-score-box').classList.add('hidden');
-                document.getElementById('adminStatRecord').innerText = '0 pts';
-                playSound('click');
+                updateAdminStats();
             }
         }
     </script>
