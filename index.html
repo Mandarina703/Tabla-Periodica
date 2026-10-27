@@ -134,6 +134,10 @@
                         <i class="fa-solid fa-graduation-cap text-xs"></i>
                         <span>Examen</span>
                     </button>
+                    <button id="nav-blank" onclick="switchTab('blank')" class="nav-btn flex items-center space-x-2 px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/50">
+                        <i class="fa-solid fa-table-cells text-xs"></i>
+                        <span>Tabla Muda</span>
+                    </button>
                     <button id="nav-tierlist" onclick="switchTab('tierlist')" class="nav-btn flex items-center space-x-2 px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/50">
                         <i class="fa-solid fa-list-ol text-xs"></i>
                         <span>Tier List</span>
@@ -452,6 +456,49 @@
                 <button onclick="resetExam()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-lg transition-all text-xs flex items-center justify-center gap-2">
                     <i class="fa-solid fa-rotate-right"></i> Reiniciar Examen
                 </button>
+            </div>
+        </section>
+
+        <!-- BLANK TABLE SECTION (TABLA MUDA) -->
+        <section id="section-blank" class="hidden space-y-4">
+            <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-4 shadow-lg flex flex-col md:flex-row gap-3 justify-between items-center">
+                <div>
+                    <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-table-cells text-indigo-400"></i> Modo Tabla Periódica Muda
+                    </h2>
+                    <p class="text-slate-400 text-xs">Completa cada cuadro con su Número Atómico, Símbolo y Nombre del Elemento.</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <span id="blank-score-display" class="text-xs font-mono font-bold text-amber-400 bg-slate-950 px-3 py-2 rounded-lg border border-slate-800">
+                        Aciertos: 0 / 118
+                    </span>
+                    <button onclick="checkBlankTable()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg text-xs transition-all shadow flex items-center gap-1.5">
+                        <i class="fa-solid fa-check"></i> Comprobar
+                    </button>
+                    <button onclick="revealBlankTable()" class="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-lg text-xs transition-all shadow flex items-center gap-1.5">
+                        <i class="fa-solid fa-eye"></i> Ver Solución
+                    </button>
+                    <button onclick="initBlankTable()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-lg text-xs transition-all border border-slate-700 flex items-center gap-1.5">
+                        <i class="fa-solid fa-rotate-right"></i> Reiniciar
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-slate-900/50 border border-slate-800/80 rounded-xl p-3 sm:p-5 shadow-xl backdrop-blur-sm">
+                <div class="periodic-wrapper">
+                    <div id="blank-table-grid" class="periodic-grid" style="grid-auto-rows: minmax(75px, auto);"></div>
+
+                    <div class="mt-4 pt-3 border-t border-slate-800/80 space-y-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] uppercase font-bold text-pink-400 w-20 flex-shrink-0">Lantánidos</span>
+                            <div id="blank-lanthanides-grid" class="lanthanide-actinide-grid flex-grow"></div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] uppercase font-bold text-rose-400 w-20 flex-shrink-0">Actínidos</span>
+                            <div id="blank-actinides-grid" class="lanthanide-actinide-grid flex-grow"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -883,11 +930,12 @@
             setupPracticeCard();
             loadHighScore();
             renderTierList();
+            initBlankTable();
         };
 
         function switchTab(tab) {
             playSound('click');
-            ['study', 'practice', 'exam', 'tierlist'].forEach(t => {
+            ['study', 'practice', 'exam', 'blank', 'tierlist'].forEach(t => {
                 const btn = document.getElementById(`nav-${t}`);
                 const sec = document.getElementById(`section-${t}`);
                 if (t === tab) {
@@ -899,6 +947,7 @@
                 }
             });
             if (tab === 'tierlist') renderTierList();
+            if (tab === 'blank') initBlankTable();
         }
 
         function renderLegend() {
@@ -981,6 +1030,138 @@
             `;
             return cell;
         }
+
+        // --- TABLA MUDA LOGIC ---
+        function initBlankTable() {
+            const mainGrid = document.getElementById('blank-table-grid');
+            const lanthGrid = document.getElementById('blank-lanthanides-grid');
+            const actGrid = document.getElementById('blank-actinides-grid');
+
+            if (!mainGrid) return;
+
+            mainGrid.innerHTML = '';
+            lanthGrid.innerHTML = '';
+            actGrid.innerHTML = '';
+
+            for (let row = 1; row <= 7; row++) {
+                for (let col = 1; col <= 18; col++) {
+                    if (row === 6 && col === 3) {
+                        mainGrid.appendChild(createPlaceholderCell("57-71", "Lantánidos", "pink"));
+                        continue;
+                    }
+                    if (row === 7 && col === 3) {
+                        mainGrid.appendChild(createPlaceholderCell("89-103", "Actínidos", "rose"));
+                        continue;
+                    }
+
+                    const elem = elementsData.find(e => e.period === row && e.group === col && !isLanthanideOrActinide(e.num));
+                    if (elem) {
+                        mainGrid.appendChild(createBlankCell(elem));
+                    } else {
+                        const empty = document.createElement('div');
+                        empty.className = "h-20 sm:h-24";
+                        mainGrid.appendChild(empty);
+                    }
+                }
+            }
+
+            elementsData.filter(e => e.num >= 57 && e.num <= 71).forEach(elem => {
+                lanthGrid.appendChild(createBlankCell(elem));
+            });
+
+            elementsData.filter(e => e.num >= 89 && e.num <= 103).forEach(elem => {
+                actGrid.appendChild(createBlankCell(elem));
+            });
+
+            updateBlankScoreDisplay(0, 118);
+        }
+
+        function createBlankCell(elem) {
+            const cell = document.createElement('div');
+            cell.id = `blank-cell-${elem.num}`;
+            cell.className = `h-20 sm:h-24 p-1 rounded border border-slate-700 bg-slate-900 flex flex-col justify-between text-[9px] transition-all`;
+            cell.innerHTML = `
+                <input type="number" id="b-num-${elem.num}" placeholder="N°" class="w-full bg-slate-950 border border-slate-800 rounded px-0.5 text-center text-white text-[10px] outline-none focus:border-indigo-500 py-0.5">
+                <input type="text" id="b-sym-${elem.num}" placeholder="Símb" class="w-full bg-slate-950 border border-slate-800 rounded px-0.5 text-center text-white font-bold text-[11px] outline-none focus:border-indigo-500 uppercase py-0.5">
+                <input type="text" id="b-name-${elem.num}" placeholder="Nombre" class="w-full bg-slate-950 border border-slate-800 rounded px-0.5 text-center text-white text-[9px] outline-none focus:border-indigo-500 py-0.5">
+            `;
+            return cell;
+        }
+
+        function checkBlankTable() {
+            playSound('click');
+            let correctCount = 0;
+
+            elementsData.forEach(elem => {
+                const numInput = document.getElementById(`b-num-${elem.num}`);
+                const symInput = document.getElementById(`b-sym-${elem.num}`);
+                const nameInput = document.getElementById(`b-name-${elem.num}`);
+                const cellContainer = document.getElementById(`blank-cell-${elem.num}`);
+
+                if (!numInput || !symInput || !nameInput || !cellContainer) return;
+
+                const userNum = parseInt(numInput.value);
+                const userSym = symInput.value.trim();
+                const userName = nameInput.value.trim();
+
+                const isNumOk = userNum === elem.num;
+                const isSymOk = normalizeStr(userSym) === normalizeStr(elem.sym);
+                const isNameOk = normalizeStr(userName) === normalizeStr(elem.name);
+
+                // Check individual inputs
+                numInput.className = `w-full rounded px-0.5 text-center text-[10px] outline-none py-0.5 border ${isNumOk ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300' : 'bg-rose-500/20 border-rose-500 text-rose-300'}`;
+                symInput.className = `w-full rounded px-0.5 text-center font-bold text-[11px] outline-none uppercase py-0.5 border ${isSymOk ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300' : 'bg-rose-500/20 border-rose-500 text-rose-300'}`;
+                nameInput.className = `w-full rounded px-0.5 text-center text-[9px] outline-none py-0.5 border ${isNameOk ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300' : 'bg-rose-500/20 border-rose-500 text-rose-300'}`;
+
+                if (isNumOk && isSymOk && isNameOk) {
+                    correctCount++;
+                    cellContainer.classList.add('border-emerald-500/50', 'bg-emerald-950/20');
+                } else {
+                    cellContainer.classList.remove('border-emerald-500/50', 'bg-emerald-950/20');
+                }
+            });
+
+            updateBlankScoreDisplay(correctCount, 118);
+            if (correctCount === 118) {
+                playSound('exact');
+                confetti({ particleCount: 120, spread: 90, origin: { y: 0.6 } });
+            } else {
+                playSound('partial');
+            }
+        }
+
+        function revealBlankTable() {
+            if (!confirm("¿Estás seguro de que deseas ver las respuestas de la Tabla Muda?")) return;
+            playSound('click');
+
+            elementsData.forEach(elem => {
+                const numInput = document.getElementById(`b-num-${elem.num}`);
+                const symInput = document.getElementById(`b-sym-${elem.num}`);
+                const nameInput = document.getElementById(`b-name-${elem.num}`);
+                const cellContainer = document.getElementById(`blank-cell-${elem.num}`);
+
+                if (numInput) numInput.value = elem.num;
+                if (symInput) symInput.value = elem.sym;
+                if (nameInput) nameInput.value = elem.name;
+
+                if (numInput) numInput.className = "w-full bg-slate-950 border border-slate-800 rounded px-0.5 text-center text-white text-[10px] outline-none focus:border-indigo-500 py-0.5";
+                if (symInput) symInput.className = "w-full bg-slate-950 border border-slate-800 rounded px-0.5 text-center text-white font-bold text-[11px] outline-none focus:border-indigo-500 uppercase py-0.5";
+                if (nameInput) nameInput.className = "w-full bg-slate-950 border border-slate-800 rounded px-0.5 text-center text-white text-[9px] outline-none focus:border-indigo-500 py-0.5";
+                if (cellContainer) {
+                    cellContainer.classList.remove('border-emerald-500/50', 'bg-emerald-950/20');
+                }
+            });
+
+            updateBlankScoreDisplay(118, 118);
+        }
+
+        function updateBlankScoreDisplay(score, total) {
+            const display = document.getElementById('blank-score-display');
+            if (display) {
+                display.innerText = `Completos: ${score} / ${total}`;
+            }
+        }
+        // --- END TABLA MUDA LOGIC ---
 
         function filterElements() {
             const query = normalizeStr(document.getElementById('study-search').value);
@@ -1729,5 +1910,7 @@
             }
         }
     </script>
+</body>
+</html>
 </body>
 </html>
