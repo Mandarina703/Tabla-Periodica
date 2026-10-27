@@ -72,7 +72,7 @@
         }
         .glow-active { animation: pulse-glow 2s infinite; }
 
-        /* Estilos Modo Admin basados en geo._3.txt */
+        /* Estilos Modo Admin */
         .modal {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -232,6 +232,10 @@
                                 <div id="card-symbol-back" class="text-sm font-bold text-indigo-400">H (Número Atómico: 1)</div>
                                 <p id="card-group-back" class="text-xs text-slate-300">Periodo 1, Grupo 1</p>
                                 <p id="card-mass-back" class="code-font text-xs text-amber-400 bg-slate-950 px-3 py-1 rounded-lg border border-slate-800 inline-block">Masa: 1.008 u</p>
+                                <div id="card-details-back" class="text-[11px] text-slate-300 space-y-0.5 pt-1 border-t border-slate-800 mt-1">
+                                    <p id="card-category-back">Categoría: No Metal</p>
+                                    <p id="card-shells-back" class="font-mono">Capas e⁻: [1]</p>
+                                </div>
                             </div>
                             <div class="text-slate-500 text-[10px]">Haz clic para volver al frente</div>
                         </div>
@@ -620,7 +624,7 @@
                     <i class="fa-solid fa-user-shield"></i> Panel de Control Admin
                 </h2>
 
-                <!-- REPRODUCTOR MP3 INTEGRADO (Busca automáticamente los-elementos.mp3 en el repositorio) -->
+                <!-- REPRODUCTOR MP3 INTEGRADO -->
                 <div class="bg-slate-900 p-3 rounded-lg border border-slate-700 mb-3 flex items-center justify-between">
                     <div class="flex items-center gap-2 text-xs text-slate-300">
                         <i class="fa-solid fa-music text-indigo-400 text-base"></i>
@@ -1116,7 +1120,7 @@
             cell.className = `h-20 sm:h-24 p-1 rounded border border-slate-700 bg-slate-900 flex flex-col justify-between text-[9px] transition-all`;
             cell.innerHTML = `
                 <input type="number" id="b-num-${elem.num}" placeholder="N°" class="w-full bg-slate-950 border border-slate-800 rounded px-0.5 text-center text-white text-[10px] outline-none focus:border-indigo-500 py-0.5">
-                <input type="text" id="b-sym-${elem.num}" placeholder="Símb" class="w-full bg-slate-950 border border-slate-800 rounded px-0.5 text-center text-white font-bold text-[11px] outline-none focus:border-indigo-500 uppercase py-0.5">
+                <input type="text" id="b-sym-${elem.num}" placeholder="Símb" class="w-full bg-slate-950 border border-slate-800 rounded px-0.5 text-center text-white font-bold text-[11px] outline-none focus:border-indigo-500 py-0.5">
                 <input type="text" id="b-name-${elem.num}" placeholder="Nombre" class="w-full bg-slate-950 border border-slate-800 rounded px-0.5 text-center text-white text-[9px] outline-none focus:border-indigo-500 py-0.5">
             `;
             return cell;
@@ -1143,7 +1147,7 @@
                 const isNameOk = normalizeStr(userName) === normalizeStr(elem.name);
 
                 numInput.className = `w-full rounded px-0.5 text-center text-[10px] outline-none py-0.5 border ${isNumOk ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300' : 'bg-rose-500/20 border-rose-500 text-rose-300'}`;
-                symInput.className = `w-full rounded px-0.5 text-center font-bold text-[11px] outline-none uppercase py-0.5 border ${isSymOk ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300' : 'bg-rose-500/20 border-rose-500 text-rose-300'}`;
+                symInput.className = `w-full rounded px-0.5 text-center font-bold text-[11px] outline-none py-0.5 border ${isSymOk ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300' : 'bg-rose-500/20 border-rose-500 text-rose-300'}`;
                 nameInput.className = `w-full rounded px-0.5 text-center text-[9px] outline-none py-0.5 border ${isNameOk ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300' : 'bg-rose-500/20 border-rose-500 text-rose-300'}`;
 
                 if (isNumOk && isSymOk && isNameOk) {
@@ -1178,7 +1182,7 @@
                 if (nameInput) nameInput.value = elem.name;
 
                 if (numInput) numInput.className = "w-full bg-slate-950 border border-slate-800 rounded px-0.5 text-center text-white text-[10px] outline-none focus:border-indigo-500 py-0.5";
-                if (symInput) symInput.className = "w-full bg-slate-950 border border-slate-800 rounded px-0.5 text-center text-white font-bold text-[11px] outline-none focus:border-indigo-500 uppercase py-0.5";
+                if (symInput) symInput.className = "w-full bg-slate-950 border border-slate-800 rounded px-0.5 text-center text-white font-bold text-[11px] outline-none focus:border-indigo-500 py-0.5";
                 if (nameInput) nameInput.className = "w-full bg-slate-950 border border-slate-800 rounded px-0.5 text-center text-white text-[9px] outline-none focus:border-indigo-500 py-0.5";
                 if (cellContainer) {
                     cellContainer.classList.remove('border-emerald-500/50', 'bg-emerald-950/20');
@@ -1324,6 +1328,8 @@
             document.getElementById('card-symbol-back').innerText = `${elem.sym} (Número Atómico: ${elem.num})`;
             document.getElementById('card-group-back').innerText = `Periodo ${elem.period}, Grupo ${elem.group}`;
             document.getElementById('card-mass-back').innerText = `Masa: ${elem.mass} u`;
+            document.getElementById('card-category-back').innerText = `Categoría: ${categoryMap[elem.category]?.name || elem.category}`;
+            document.getElementById('card-shells-back').innerText = `Capas e⁻: [${elem.shells.join(', ')}]`;
 
             document.getElementById('practice-counter').innerText = `${practiceIndex + 1} / ${practiceList.length}`;
 
@@ -1766,7 +1772,7 @@
 
         function loginAdmin() {
             const pass = document.getElementById('adminPassInput').value;
-            if (pass === '0105') { // Clave requerida
+            if (pass === '0105') {
                 document.getElementById('adminLoginSection').classList.add('hidden');
                 document.getElementById('adminDashboardSection').classList.remove('hidden');
                 document.getElementById('adminDashboardSection').classList.add('flex');
@@ -1876,7 +1882,7 @@
                     </div>
                     <div class="flex items-center gap-1 self-end sm:self-auto">
                         <button onclick="adjustTierListScore(${index}, 100)" class="px-2 py-1 bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 border border-indigo-500/30 rounded text-[10px] font-bold" title="Añadir 100 pts">+100</button>
-                        <button onclick="adjustTierListScore(${index}, -100)" class="px-2 py-1 bg-rose-600/30 hover:bg-rose-600/50 text-rose-300 border border-rose-500/30 rounded text-[10px] font-bold" title="Restar 100 pts">-100</button>
+                        <button onclick="adjustTierListScore(${index}, -100)" class="px-2 py-1 bg-rose-600/30 hover:bg-rose-600/50 text-rose-300 border border-indigo-500/30 rounded text-[10px] font-bold" title="Restar 100 pts">-100</button>
                         <button onclick="deleteTierListItem(${index})" class="px-2 py-1 bg-rose-600 hover:bg-rose-500 text-white rounded text-[10px]" title="Eliminar registro"><i class="fa-solid fa-trash-can"></i></button>
                     </div>
                 `;
@@ -1929,5 +1935,7 @@
             }
         }
     </script>
+</body>
+</html>
 </body>
 </html>
