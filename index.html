@@ -114,7 +114,7 @@
                     <span class="hidden sm:inline text-[11px] font-medium">Sonido</span>
                 </button>
 
-                <!-- Admin Button (Adaptado del segundo archivo) -->
+                <!-- Admin Button -->
                 <button onclick="openAdminModal()" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-all border border-slate-700 text-xs flex items-center gap-1.5" title="Modo Admin">
                     <i class="fa-solid fa-user-gear text-indigo-400"></i>
                     <span class="hidden sm:inline text-[11px] font-medium">Modo Admin</span>
@@ -593,7 +593,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE MODO ADMIN (Estructura adaptada) -->
+    <!-- MODAL DE MODO ADMIN -->
     <div id="adminModal" class="modal">
         <div class="bg-slate-800 border border-slate-700 rounded-xl max-w-2xl w-full p-6 shadow-2xl relative text-slate-100 mx-4 max-h-[90vh] flex flex-col">
             <button onclick="closeAdminModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg">
@@ -619,6 +619,18 @@
                 <h2 class="text-xl font-bold mb-3 flex items-center gap-2 text-indigo-400">
                     <i class="fa-solid fa-user-shield"></i> Panel de Control Admin
                 </h2>
+
+                <!-- REPRODUCTOR MP3 INTEGRADO (Busca automáticamente los-elementos.mp3 en el repositorio) -->
+                <div class="bg-slate-900 p-3 rounded-lg border border-slate-700 mb-3 flex items-center justify-between">
+                    <div class="flex items-center gap-2 text-xs text-slate-300">
+                        <i class="fa-solid fa-music text-indigo-400 text-base"></i>
+                        <span>Reproductor MP3: <strong>los-elementos.mp3</strong></span>
+                    </div>
+                    <button onclick="toggleAdminAudio()" id="adminAudioBtn" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shadow">
+                        <i id="adminAudioIcon" class="fa-solid fa-play"></i> <span id="adminAudioText">Reproducir</span>
+                    </button>
+                </div>
+                <audio id="adminAudioElement" src="los-elementos.mp3" preload="auto"></audio>
 
                 <!-- Tabs Admin -->
                 <div class="flex flex-wrap gap-2 border-b border-slate-700 pb-2 mb-4">
@@ -734,7 +746,6 @@
                 osc.start(now);
                 osc.stop(now + 0.05);
             } else if (type === 'exact') {
-                // Chord fanfare
                 [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
                     const o = audioCtx.createOscillator();
                     const g = audioCtx.createGain();
@@ -770,6 +781,27 @@
                 gain.gain.linearRampToValueAtTime(0.01, now + 0.08);
                 osc.start(now);
                 osc.stop(now + 0.08);
+            }
+        }
+
+        // CONTROLADOR DE AUDIO MP3 EN MODO ADMIN
+        function toggleAdminAudio() {
+            const audio = document.getElementById('adminAudioElement');
+            const icon = document.getElementById('adminAudioIcon');
+            const text = document.getElementById('adminAudioText');
+
+            if (audio.paused) {
+                audio.play().then(() => {
+                    icon.className = "fa-solid fa-pause";
+                    text.innerText = "Pausar";
+                }).catch(err => {
+                    alert("No se pudo reproducir 'los-elementos.mp3'. Verifica que el archivo esté subido en la misma carpeta que index.html en GitHub.");
+                    console.error(err);
+                });
+            } else {
+                audio.pause();
+                icon.className = "fa-solid fa-play";
+                text.innerText = "Reproducir";
             }
         }
 
@@ -914,7 +946,6 @@
         let practiceIndex = 0;
         let isCardFlipped = false;
 
-        // Exam State
         let quizQuestions = [];
         let currentQuizIndex = 0;
         let quizScore = { exact: 0, partial: 0, incorrect: 0, points: 0, streak: 0, maxStreak: 0, totalBonuses: 0 };
@@ -922,7 +953,6 @@
         let currentTimerSeconds = 0;
         let animFrameId = null;
 
-        // String Normalizer (removes accents for user-friendly text comparison)
         function normalizeStr(str) {
             if (!str) return '';
             return str.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -1112,7 +1142,6 @@
                 const isSymOk = normalizeStr(userSym) === normalizeStr(elem.sym);
                 const isNameOk = normalizeStr(userName) === normalizeStr(elem.name);
 
-                // Check individual inputs
                 numInput.className = `w-full rounded px-0.5 text-center text-[10px] outline-none py-0.5 border ${isNumOk ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300' : 'bg-rose-500/20 border-rose-500 text-rose-300'}`;
                 symInput.className = `w-full rounded px-0.5 text-center font-bold text-[11px] outline-none uppercase py-0.5 border ${isSymOk ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300' : 'bg-rose-500/20 border-rose-500 text-rose-300'}`;
                 nameInput.className = `w-full rounded px-0.5 text-center text-[9px] outline-none py-0.5 border ${isNameOk ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300' : 'bg-rose-500/20 border-rose-500 text-rose-300'}`;
@@ -1165,7 +1194,6 @@
                 display.innerText = `Completos: ${score} / ${total}`;
             }
         }
-        // --- END TABLA MUDA LOGIC ---
 
         function filterElements() {
             const query = normalizeStr(document.getElementById('study-search').value);
@@ -1196,7 +1224,6 @@
             filterElements();
         }
 
-        // BOHR ATOM MODEL CANVAS ANIMATION
         function drawBohrAtom(shells) {
             const canvas = document.getElementById('bohr-canvas');
             if (!canvas) return;
@@ -1211,7 +1238,6 @@
             function animate() {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                // Nucleus Glow
                 ctx.beginPath();
                 ctx.arc(centerX, centerY, 8, 0, Math.PI * 2);
                 ctx.fillStyle = '#6366f1';
@@ -1220,22 +1246,18 @@
                 ctx.fill();
                 ctx.shadowBlur = 0;
 
-                // Orbit Rings & Electrons
                 const maxRadius = 58;
                 const shellCount = shells.length;
 
                 shells.forEach((electronCount, sIdx) => {
                     const radius = 16 + (sIdx + 1) * ((maxRadius - 16) / Math.max(shellCount, 1));
 
-                    // Orbit line
                     ctx.beginPath();
                     ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
                     ctx.strokeStyle = 'rgba(148, 163, 184, 0.2)';
                     ctx.lineWidth = 1;
                     ctx.stroke();
 
-                    // Electrons
-                    const speed = 0.015 / (sIdx + 1);
                     for (let i = 0; i < electronCount; i++) {
                         const eAngle = angle * (sIdx % 2 === 0 ? 1 : -1) + (i * (Math.PI * 2 / electronCount));
                         const ex = centerX + radius * Math.cos(eAngle);
@@ -1346,7 +1368,6 @@
             setupPracticeCard();
         }
 
-        // EXAM SYSTEM WITH DYNAMIC SCORING
         function loadHighScore() {
             const best = localStorage.getItem('pt_exam_high_score');
             if (best) {
@@ -1446,13 +1467,11 @@
                 `;
             }
 
-            // Focus on first input
             setTimeout(() => {
                 const firstInput = inputsContainer.querySelector('input');
                 if (firstInput) firstInput.focus();
             }, 50);
 
-            // Timer Setup
             const timerLimit = parseInt(document.getElementById('exam-timer').value);
             const timerDisplay = document.getElementById('quiz-timer-display');
 
@@ -1496,7 +1515,6 @@
 
             q.userAnswers = { sym: userSym, name: userName, num: userNum };
 
-            // EVALUATION LOGIC
             let textCorrect = false;
             let points = 0;
             let diff = 0;
@@ -1508,7 +1526,7 @@
                 textCorrect = (normalizeStr(userName) === normalizeStr(elem.name));
             } else if (q.qType === 'num_to_name_sym') {
                 textCorrect = (normalizeStr(userName) === normalizeStr(elem.name)) && (normalizeStr(userSym) === normalizeStr(elem.sym));
-                userNum = elem.num; // Exact
+                userNum = elem.num;
             }
 
             if (!textCorrect) {
@@ -1541,7 +1559,7 @@
                 if (points > 0) {
                     if (diff === 0) {
                         isExactBonus = true;
-                        points += 50; // Exact match bonus
+                        points += 50;
                         quizScore.exact++;
                         quizScore.totalBonuses += 50;
                         playSound('exact');
@@ -1639,7 +1657,6 @@
             document.getElementById('results-max-streak').innerText = quizScore.maxStreak;
             document.getElementById('results-bonuses-total').innerText = `+${quizScore.totalBonuses} pts`;
 
-            // Breakdown
             const breakdownContainer = document.getElementById('results-breakdown');
             breakdownContainer.innerHTML = '';
 
@@ -1663,7 +1680,6 @@
                 breakdownContainer.appendChild(div);
             });
 
-            // Check high score
             const currentBest = parseInt(localStorage.getItem('pt_exam_high_score') || '0');
             if (quizScore.points > currentBest) {
                 localStorage.setItem('pt_exam_high_score', quizScore.points);
@@ -1695,7 +1711,6 @@
             document.getElementById('exam-setup').classList.remove('hidden');
         }
 
-        // TIER LIST SYSTEM
         function renderTierList() {
             const tbody = document.getElementById('tierlist-table-body');
             const tierlist = JSON.parse(localStorage.getItem('pt_tierlist') || '[]');
@@ -1740,7 +1755,7 @@
             }
         }
 
-        // MODO ADMIN SYSTEM (Tomado y adaptado del segundo archivo)
+        // MODO ADMIN SYSTEM
         function openAdminModal() {
             document.getElementById('adminModal').style.display = 'flex';
         }
@@ -1751,7 +1766,7 @@
 
         function loginAdmin() {
             const pass = document.getElementById('adminPassInput').value;
-            if (pass === '0105') { // Clave simple de demostración
+            if (pass === '0105') { // Clave requerida
                 document.getElementById('adminLoginSection').classList.add('hidden');
                 document.getElementById('adminDashboardSection').classList.remove('hidden');
                 document.getElementById('adminDashboardSection').classList.add('flex');
